@@ -212,6 +212,11 @@ class LevelConfig {
     required this.theme,
     required this.baseReward,
     required this.objects,
+    this.generatorVersion,
+    this.generationSeed,
+    this.generationTemplate,
+    this.generationDifficulty,
+    this.complexityScore,
   });
 
   final int id;
@@ -220,4 +225,11 @@ class LevelConfig {
   final LevelTheme theme;
   final int baseReward;
   final List<ObjectSpec> objects;
+
+  /// Set only for levels emitted by [LevelGenerator].
+  final int? generatorVersion;
+  final int? generationSeed;
+  final String? generationTemplate;
+  final int? generationDifficulty;
+  final double? complexityScore;
 }
