@@ -37,14 +37,6 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
-
-    applicationVariants.all {
-        outputs.all {
-            if (this is com.android.build.gradle.internal.api.ApkVariantOutputImpl) {
-                outputFileName = "TapChain_install.apk"
-            }
-        }
-    }
 }
 
 flutter {

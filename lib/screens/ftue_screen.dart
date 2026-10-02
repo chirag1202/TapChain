@@ -102,7 +102,7 @@ class _FtueScreenState extends State<FtueScreen>
                     _Step(
                       title: 'TAP',
                       text:
-                          'Tap anywhere on the screen, once. The timer freezes and the chain runs by itself.',
+                          'Tap a domino, ball, or box to start a reaction there. Your goal is to reach the target.',
                       child: _PreviewCard(anim: _anim, hand: true),
                     ),
                     _Step(

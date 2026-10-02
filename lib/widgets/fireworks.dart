@@ -96,6 +96,9 @@ class _FireworksState extends State<Fireworks>
     }
 
     _frame.value++;
+    if (elapsed >= widget.duration && _rockets.isEmpty && _sparks.isEmpty) {
+      _ticker.stop();
+    }
   }
 
   void _launch() {

@@ -53,7 +53,7 @@ void main() {
       await LocalStorage.init();
       final s = LocalStorage.instance
         ..unlock(2)
-        ..unlock(9);
+        ..unlock(11);
       expect(s.unlockedLevel.value, 4);
     });
   });

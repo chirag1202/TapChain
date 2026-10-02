@@ -5,7 +5,7 @@ const double kWorldWidth = 9;
 const double kWorldHeight = 16;
 const double kGroundY = 14; // top surface of the floor
 
-enum ObjectKind { domino, ball, box, platform, target }
+enum ObjectKind { domino, ball, box, platform, jumper, target }
 
 enum ThemeId { garden, workshop, construction, neon, space, ocean, volcano }
 
@@ -71,15 +71,15 @@ class ObjectSpec {
     bool starter = false,
     Offset push = Offset.zero,
   }) : this._(
-          kind: ObjectKind.domino,
-          x: x,
-          y: surfaceY - h / 2,
-          w: 0.22,
-          h: h,
-          angle: angle,
-          starter: starter,
-          push: push,
-        );
+         kind: ObjectKind.domino,
+         x: x,
+         y: surfaceY - h / 2,
+         w: 0.22,
+         h: h,
+         angle: angle,
+         starter: starter,
+         push: push,
+       );
 
   /// Ball resting on a surface at [surfaceY].
   const ObjectSpec.ball(
@@ -89,13 +89,13 @@ class ObjectSpec {
     bool starter = false,
     Offset push = Offset.zero,
   }) : this._(
-          kind: ObjectKind.ball,
-          x: x,
-          y: surfaceY - radius,
-          radius: radius,
-          starter: starter,
-          push: push,
-        );
+         kind: ObjectKind.ball,
+         x: x,
+         y: surfaceY - radius,
+         radius: radius,
+         starter: starter,
+         push: push,
+       );
 
   /// Box resting on a surface at [surfaceY].
   const ObjectSpec.box(
@@ -106,14 +106,14 @@ class ObjectSpec {
     bool starter = false,
     Offset push = Offset.zero,
   }) : this._(
-          kind: ObjectKind.box,
-          x: x,
-          y: surfaceY - h / 2,
-          w: w,
-          h: h,
-          starter: starter,
-          push: push,
-        );
+         kind: ObjectKind.box,
+         x: x,
+         y: surfaceY - h / 2,
+         w: w,
+         h: h,
+         starter: starter,
+         push: push,
+       );
 
   /// Static platform; (x, y) is the midpoint of the top surface.
   factory ObjectSpec.platform(
@@ -135,12 +135,20 @@ class ObjectSpec {
 
   /// Target bullseye standing on the ground / platform at [surfaceY].
   const ObjectSpec.target(double x, double surfaceY, {double radius = 0.55})
-      : this._(
-          kind: ObjectKind.target,
-          x: x,
-          y: surfaceY - radius,
-          radius: radius,
-        );
+    : this._(
+        kind: ObjectKind.target,
+        x: x,
+        y: surfaceY - radius,
+        radius: radius,
+      );
+
+  /// Spring pad fixed to a surface at [surfaceY]. Contact launches an object up.
+  const ObjectSpec.jumper(
+    double x,
+    double surfaceY, {
+    double w = 1.0,
+    double h = 0.36,
+  }) : this._(kind: ObjectKind.jumper, x: x, y: surfaceY - h / 2, w: w, h: h);
 
   final ObjectKind kind;
   final double x;
@@ -150,10 +158,10 @@ class ObjectSpec {
   final double radius;
   final double angle;
 
-  /// Candidate for the player's tap; tapping picks the nearest starter.
+  /// Default launch object used when the timer expires without a tap.
   final bool starter;
 
-  /// Impulse applied at the top of a starter when triggered.
+  /// Authored launch impulse used for this level's default starter.
   final Offset push;
 
   bool get isDynamic =>
@@ -162,16 +170,16 @@ class ObjectSpec {
       kind == ObjectKind.box;
 
   ObjectSpec withPushScale(double k) => ObjectSpec._(
-        kind: kind,
-        x: x,
-        y: y,
-        w: w,
-        h: h,
-        radius: radius,
-        angle: angle,
-        starter: starter,
-        push: push * k,
-      );
+    kind: kind,
+    x: x,
+    y: y,
+    w: w,
+    h: h,
+    radius: radius,
+    angle: angle,
+    starter: starter,
+    push: push * k,
+  );
 
   /// A row of dominoes from [fromX], spaced by [spacing].
   static List<ObjectSpec> dominoRow({

@@ -8,18 +8,34 @@ import 'level_config.dart';
 
 class PhysicsObject {
   PhysicsObject(this.spec, this.body)
-    : _px = body.position.x,
+    : initialPosition = body.position.clone(),
+      initialAngle = body.angle,
+      _px = body.position.x,
       _py = body.position.y,
       _pa = body.angle;
 
   final ObjectSpec spec;
   final Body body;
   bool gone = false;
+  bool activated = false;
   double flash = -1; // seconds since the target was hit, <0 means never
+  final Vector2 initialPosition;
+  final double initialAngle;
 
   double _px, _py, _pa;
 
   bool get isTarget => spec.kind == ObjectKind.target;
+  bool get isJumper => spec.kind == ObjectKind.jumper;
+
+  bool get hasFallen {
+    if (!spec.isDynamic) return false;
+    if (gone) return true;
+    final displacement = body.position.distanceTo(initialPosition);
+    final tipped =
+        spec.kind == ObjectKind.domino &&
+        (body.angle - initialAngle).abs() > 0.25;
+    return displacement > 0.45 || tipped;
+  }
 
   void savePrevious() {
     _px = body.position.x;
@@ -49,6 +65,9 @@ class Materials {
 
   static FixtureDef target(Shape s) =>
       FixtureDef(s, density: 0, isSensor: true);
+
+  static FixtureDef jumper(Shape s) =>
+      FixtureDef(s, density: 0, friction: 0.2, restitution: 0.85);
 }
 
 /// Draws one object centred on the origin of [c]; caller applies translate and rotate.
@@ -71,6 +90,8 @@ void paintObject(
       _paintBox(c, t, w, h);
     case ObjectKind.platform:
       _paintPlatform(c, t, w, h);
+    case ObjectKind.jumper:
+      _paintJumper(c, t, w, h, flash, time);
     case ObjectKind.target:
       _paintTarget(c, t, radius, flash, time);
   }
@@ -309,4 +330,89 @@ void _paintTarget(Canvas c, LevelTheme t, double r, double flash, double time) {
       ..strokeWidth = 0.04
       ..color = Colors.black.withValues(alpha: 0.25),
   );
+}
+
+void _paintJumper(
+  Canvas c,
+  LevelTheme t,
+  double w,
+  double h,
+  double flash,
+  double time,
+) {
+  final activated = flash >= 0 && flash < 0.28;
+  final pulse = activated ? (1 - flash / 0.28) : 0.0;
+  final body = RRect.fromRectAndRadius(
+    Rect.fromCenter(center: Offset(0, h * 0.28), width: w, height: h * 0.42),
+    Radius.circular(h * 0.12),
+  );
+  if (t.glow || activated) {
+    c.drawRRect(
+      body,
+      Paint()
+        ..color = t.accent.withValues(alpha: activated ? 0.5 * pulse : 0.18),
+    );
+  }
+  c.drawRRect(body, Paint()..color = t.platformEdge);
+
+  final spring = Path()..moveTo(-w * 0.26, h * 0.2);
+  const coils = 4;
+  for (var i = 0; i <= coils; i++) {
+    final x = i.isEven ? -w * 0.2 : w * 0.2;
+    final y = h * 0.12 - i * h * 0.27;
+    spring.lineTo(x, y);
+  }
+  c.drawPath(
+    spring,
+    Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = h * 0.12
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..color = t.accent,
+  );
+
+  final plate = RRect.fromRectAndRadius(
+    Rect.fromCenter(
+      center: Offset(0, -h * 0.48),
+      width: w * 0.9,
+      height: h * 0.18,
+    ),
+    Radius.circular(h * 0.08),
+  );
+  c.drawRRect(plate, Paint()..color = t.domino);
+  c.drawRRect(
+    plate,
+    Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = h * 0.035
+      ..color = Colors.white.withValues(alpha: 0.75),
+  );
+
+  if (activated) {
+    final arrowY = -h * (0.85 + pulse * 0.3);
+    final arrowPaint = Paint()
+      ..color = t.accent.withValues(alpha: pulse)
+      ..strokeWidth = h * 0.08
+      ..strokeCap = StrokeCap.round;
+    c.drawLine(Offset(0, -h * 0.7), Offset(0, arrowY), arrowPaint);
+    c.drawLine(
+      Offset(0, arrowY),
+      Offset(-h * 0.16, arrowY + h * 0.17),
+      arrowPaint,
+    );
+    c.drawLine(
+      Offset(0, arrowY),
+      Offset(h * 0.16, arrowY + h * 0.17),
+      arrowPaint,
+    );
+  } else {
+    final arrowPaint = Paint()
+      ..color = t.accent.withValues(alpha: 0.8 + 0.2 * math.sin(time * 3))
+      ..strokeWidth = h * 0.07
+      ..strokeCap = StrokeCap.round;
+    c.drawLine(Offset(0, -h * 0.63), Offset(0, -h * 0.95), arrowPaint);
+    c.drawLine(Offset(0, -h * 0.95), Offset(-h * 0.13, -h * 0.81), arrowPaint);
+    c.drawLine(Offset(0, -h * 0.95), Offset(h * 0.13, -h * 0.81), arrowPaint);
+  }
 }

@@ -46,8 +46,8 @@ LevelConfig withPush(LevelConfig l, double k) => LevelConfig(
 );
 
 void main() {
-  test('there are seven levels with exactly one starter each', () {
-    expect(allLevels.length, 7);
+  test('there are ten levels with exactly one default starter each', () {
+    expect(allLevels.length, 10);
     for (final l in allLevels) {
       expect(l.objects.where((o) => o.starter).length, 1, reason: 'L${l.id}');
     }

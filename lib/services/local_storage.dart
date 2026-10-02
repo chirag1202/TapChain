@@ -9,7 +9,7 @@ class LocalStorage {
   static const _coinsKey = 'coins';
   static const _unlockedKey = 'unlockedLevel';
   static const _ftueKey = 'ftueSeen';
-  static const int levelCount = 7;
+  static const int levelCount = 10;
 
   static late LocalStorage instance;
 

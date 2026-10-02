@@ -82,15 +82,20 @@ class TapChainGame extends FlameGame {
     _oy = topInset + (h - kWorldHeight * _scale) / 2;
   }
 
-  /// The single allowed tap; position is irrelevant.
-  void handleTap() {
-    if (state == GameState.waiting) _start();
+  /// Starts the chain only when the authored starter object is tapped.
+  void handleTap(Offset screenPosition) {
+    if (state != GameState.waiting) return;
+    final point = Vector2(
+      (screenPosition.dx - _ox) / _scale,
+      (screenPosition.dy - _oy) / _scale,
+    );
+    if (sim.triggerAt(point)) _start();
   }
 
-  void _start() {
+  void _start({bool timeout = false}) {
+    if (timeout) sim.trigger();
     _frozen = LevelResult.floorTenths(_remaining);
     displayTime.value = _frozen;
-    sim.trigger();
     state = GameState.running;
     stateNotifier.value = state;
     AudioService.instance.tap();
@@ -98,22 +103,29 @@ class TapChainGame extends FlameGame {
 
   @override
   void update(double dt) {
-    super.update(dt);
-    _clock += dt;
+    if (_reported) return;
+    final frameDt = math.min(dt, 0.1);
+    super.update(frameDt);
+    _clock += frameDt;
 
     if (state == GameState.waiting) {
-      _remaining = math.max(0, _remaining - dt);
+      _remaining = math.max(0, _remaining - frameDt);
       final shown = LevelResult.floorTenths(_remaining);
       if (shown != displayTime.value) displayTime.value = shown;
-      if (_remaining <= 0) _start();
+      if (_remaining <= 0) _start(timeout: true);
     }
 
-    final simDt = dt * playbackSpeed;
+    final simDt = frameDt * playbackSpeed;
     if (state == GameState.running) {
       sim.update(simDt);
       if (sim.targetHit) {
         state = GameState.success;
-        result = LevelResult(timeLeft: _frozen, baseReward: level.baseReward);
+        result = LevelResult(
+          timeLeft: _frozen,
+          baseReward: level.baseReward,
+          fallenObjects: sim.fallenObjectCount,
+          totalObjects: sim.totalDynamicObjects,
+        );
         stateNotifier.value = state;
         _endTimer = 1.4;
       } else if (sim.failed) {
@@ -123,14 +135,15 @@ class TapChainGame extends FlameGame {
       }
     } else if (state != GameState.waiting) {
       sim.update(simDt);
-      _endTimer -= dt;
+      _endTimer -= frameDt;
       if (_endTimer <= 0 && !_reported) {
         _reported = true;
         onFinished(result);
+        pauseEngine();
       }
     }
 
-    _updateParticles(dt);
+    _updateParticles(frameDt);
   }
 
   void _updateParticles(double dt) {
@@ -224,5 +237,12 @@ class TapChainGame extends FlameGame {
 
     canvas.restore();
     super.render(canvas);
+  }
+
+  @override
+  void onDispose() {
+    displayTime.dispose();
+    stateNotifier.dispose();
+    super.onDispose();
   }
 }

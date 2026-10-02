@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flame_audio/flame_audio.dart';
@@ -23,26 +24,38 @@ class AudioService {
 
   bool _ready = false;
   final Map<String, int> _lastPlayed = {};
+  final Map<String, AudioPool> _pools = {};
 
   Future<void> init() async {
     try {
       await FlameAudio.audioCache.loadAll(_files);
+      for (final file in _files) {
+        final maxPlayers = switch (file) {
+          'domino.wav' || 'ball.wav' || 'box.wav' => 3,
+          _ => 1,
+        };
+        _pools[file] = await FlameAudio.createPool(
+          file,
+          minPlayers: 1,
+          maxPlayers: maxPlayers,
+        );
+      }
       _ready = true;
     } catch (_) {
+      await Future.wait(_pools.values.map((pool) => pool.dispose()));
+      _pools.clear();
       _ready = false;
     }
   }
 
   void _play(String file, {double volume = 1, int minGapMs = 0}) {
     if (!_ready) return;
+    final pool = _pools[file];
+    if (pool == null) return;
     final now = DateTime.now().millisecondsSinceEpoch;
     if (now - (_lastPlayed[file] ?? 0) < minGapMs) return;
     _lastPlayed[file] = now;
-    try {
-      FlameAudio.play(file, volume: volume).then((_) {}, onError: (_) {});
-    } catch (_) {
-      // Ignore playback failures.
-    }
+    unawaited(pool.start(volume: volume).then<void>((_) {}, onError: (_) {}));
   }
 
   void tap() => _play('tap.wav');

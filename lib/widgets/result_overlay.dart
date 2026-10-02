@@ -116,7 +116,12 @@ class _ResultOverlayState extends State<ResultOverlay>
                         LevelResult.formatMultiplier(r.multiplier),
                         0.27,
                       ),
-                      _row('BASE REWARD', '${r.baseReward}', 0.34),
+                      _row(
+                        'OBJECTS MOVED',
+                        '${r.fallenObjects}/${r.totalObjects}',
+                        0.34,
+                      ),
+                      _row('BASE SCORE', '${r.baseScore}', 0.4),
                       const SizedBox(height: 6),
                       Opacity(
                         opacity: _step(0.4, 0.5),

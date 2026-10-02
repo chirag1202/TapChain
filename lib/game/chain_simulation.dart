@@ -39,6 +39,10 @@ class ChainSimulation extends ContactListener {
   /// The object the player's tap sets in motion.
   PhysicsObject get starter => objects.firstWhere((o) => o.spec.starter);
 
+  int get totalDynamicObjects => objects.where((o) => o.spec.isDynamic).length;
+
+  int get fallenObjectCount => objects.where((o) => o.hasFallen).length;
+
   /// Fraction of the next fixed step already elapsed, for render interpolation.
   double get alpha => triggered ? _acc / step : 0;
 
@@ -74,6 +78,12 @@ class ChainSimulation extends ContactListener {
               PolygonShape()..setAsBoxXY(spec.w / 2, spec.h / 2),
             ),
           );
+        case ObjectKind.jumper:
+          body.createFixture(
+            Materials.jumper(
+              PolygonShape()..setAsBoxXY(spec.w / 2, spec.h / 2),
+            ),
+          );
         case ObjectKind.ball:
           body.createFixture(
             Materials.ball(CircleShape()..radius = spec.radius),
@@ -97,17 +107,79 @@ class ChainSimulation extends ContactListener {
     );
   }
 
-  void trigger() {
-    if (triggered) return;
+  bool triggerAt(Vector2? tapPoint) {
+    if (triggered) return false;
+    final tapped = tapPoint == null
+        ? starter
+        : objects
+              .where(
+                (o) => o.spec.isDynamic && !o.gone && _containsTap(o, tapPoint),
+              )
+              .fold<PhysicsObject?>(null, (nearest, candidate) {
+                if (nearest == null) return candidate;
+                final candidateDistance =
+                    (candidate.body.position - tapPoint).length2;
+                final nearestDistance =
+                    (nearest.body.position - tapPoint).length2;
+                return candidateDistance < nearestDistance
+                    ? candidate
+                    : nearest;
+              });
+    if (tapped == null) return false;
     triggered = true;
-    final s = starter;
-    final spec = s.spec;
-    final impulse = Vector2(spec.push.dx, spec.push.dy);
-    final point = spec.kind == ObjectKind.domino
-        ? s.body.worldPoint(Vector2(0, -spec.h * 0.45))
-        : s.body.worldCenter;
-    s.body.applyLinearImpulse(impulse, point: point);
+    _launch(tapped);
+    return true;
   }
+
+  void _launch(PhysicsObject object) {
+    final spec = object.spec;
+    var impulse = Vector2(spec.push.dx, spec.push.dy);
+    if (!spec.starter) {
+      PhysicsObject? nearest;
+      var nearestDistance = double.infinity;
+      for (final other in objects) {
+        if (identical(other, object) || !other.spec.isDynamic || other.gone) {
+          continue;
+        }
+        final delta = other.body.position - object.body.position;
+        final distance = delta.length2;
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearest = other;
+        }
+      }
+      final direction = nearest == null
+          ? (object.body.position.x < kWorldWidth / 2 ? 1.0 : -1.0)
+          : (nearest.body.position.x >= object.body.position.x ? 1.0 : -1.0);
+      final strength = switch (spec.kind) {
+        ObjectKind.domino => 0.35,
+        ObjectKind.ball => 0.9,
+        ObjectKind.box => 14.0,
+        _ => 0.0,
+      };
+      impulse = Vector2(direction * strength, 0);
+    }
+    final point = spec.kind == ObjectKind.domino
+        ? object.body.worldPoint(Vector2(0, -spec.h * 0.45))
+        : object.body.worldCenter;
+    object.body.applyLinearImpulse(impulse, point: point);
+  }
+
+  bool _containsTap(PhysicsObject object, Vector2 point) {
+    final spec = object.spec;
+    final dx = point.x - object.body.position.x;
+    final dy = point.y - object.body.position.y;
+    final c = math.cos(object.body.angle);
+    final s = math.sin(object.body.angle);
+    final localX = dx * c + dy * s;
+    final localY = -dx * s + dy * c;
+    if (spec.kind == ObjectKind.ball) {
+      return localX * localX + localY * localY <= spec.radius * spec.radius;
+    }
+    return localX.abs() <= spec.w / 2 && localY.abs() <= spec.h / 2;
+  }
+
+  void trigger() => triggerAt(null);
 
   /// Advances physics by [dt] real seconds using fixed steps.
   void update(double dt) {
@@ -160,7 +232,27 @@ class ChainSimulation extends ContactListener {
   void beginContact(Contact contact) {
     final a = contact.fixtureA.body.userData as PhysicsObject?;
     final b = contact.fixtureB.body.userData as PhysicsObject?;
-    if (a == null || b == null || targetHit) return;
+    if (a == null || b == null) return;
+
+    final jumper = a.isJumper
+        ? a
+        : b.isJumper
+        ? b
+        : null;
+    if (jumper != null && !jumper.activated) {
+      final launched = identical(jumper, a) ? b : a;
+      if (launched.spec.isDynamic) {
+        final horizontal = launched.body.linearVelocity.x
+            .clamp(-2.0, 2.0)
+            .toDouble();
+        launched.body.linearVelocity = Vector2(horizontal, -15);
+        launched.body.setAwake(true);
+        jumper.activated = true;
+        jumper.flash = 0;
+      }
+    }
+
+    if (targetHit) return;
     final aTarget = a.isTarget;
     final bTarget = b.isTarget;
     if (aTarget == bTarget) return;

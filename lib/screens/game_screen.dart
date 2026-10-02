@@ -65,7 +65,7 @@ class _GameScreenState extends State<GameScreen> {
         children: [
           GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTapDown: (_) => game.handleTap(),
+            onTapDown: (details) => game.handleTap(details.localPosition),
             child: GameWidget(game: game),
           ),
           Positioned(
@@ -74,20 +74,18 @@ class _GameScreenState extends State<GameScreen> {
             right: 14,
             child: _Hud(game: game, level: level),
           ),
-          Positioned(
-            bottom: pad.bottom + 20,
-            left: 0,
-            right: 0,
-            child: IgnorePointer(
-              child: ValueListenableBuilder<GameState>(
-                valueListenable: game.stateNotifier,
-                builder: (context, state, _) => AnimatedOpacity(
-                  opacity: state == GameState.waiting ? 1 : 0,
-                  duration: const Duration(milliseconds: 200),
-                  child: const Center(child: _TapPrompt()),
-                ),
-              ),
-            ),
+          ValueListenableBuilder<GameState>(
+            valueListenable: game.stateNotifier,
+            builder: (context, state, _) => state == GameState.waiting
+                ? Positioned(
+                    bottom: pad.bottom + 20,
+                    left: 0,
+                    right: 0,
+                    child: const IgnorePointer(
+                      child: Center(child: _TapPrompt()),
+                    ),
+                  )
+                : const SizedBox.shrink(),
           ),
           if (_finished)
             Positioned.fill(
@@ -211,7 +209,7 @@ class _TapPromptState extends State<_TapPrompt>
       animation: _c,
       builder: (context, child) =>
           Transform.scale(scale: 1 + 0.06 * _c.value, child: child),
-      child: const OutlinedText('TAP TO START', size: 28),
+      child: const OutlinedText('TAP AN OBJECT', size: 28),
     );
   }
 }
