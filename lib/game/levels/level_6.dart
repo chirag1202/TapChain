@@ -21,21 +21,32 @@ const oceanTheme = LevelTheme(
   accent: Color(0xFF7FFFD4),
 );
 
-// Marble run: the starter ball rolls down reef ramps into a domino row.
+// Two ball drops feed three connected domino runs down to the target.
 final level6 = LevelConfig(
   id: 6,
   name: 'Deep Dive',
-  hint: 'Let the pearl roll.',
+  hint: 'Start midway and follow both drops.',
   theme: oceanTheme,
   baseReward: 250,
   objects: [
-    ObjectSpec.platform(1.7, 3.8, 2.8),
-    ObjectSpec.ball(1.0, 3.8, starter: true, push: const Offset(0.9, 0)),
-    ObjectSpec.platform(5.2, 6.0, 4.2, angle: 0.22),
-    ObjectSpec.platform(6.0, 9.2, 5.6, angle: -0.2),
-    ObjectSpec.platform(2.1, 11.5, 3.6),
-    ...ObjectSpec.dominoRow(fromX: 1.4, surfaceY: 11.5, count: 2, spacing: 0.6),
-    ObjectSpec.target(0.6, 11.5, radius: 0.45),
-    ObjectSpec.box(8.0, kGroundY),
+    ObjectSpec.platform(2.7, 8.0, 5.0),
+    ObjectSpec.domino(0.95, 8.0, starter: true, push: const Offset(0.35, 0)),
+    ...ObjectSpec.dominoRow(fromX: 1.55, surfaceY: 8.0, count: 4),
+    ObjectSpec.ball(4.15, 8.0),
+    ObjectSpec.platform(6.0, 10.7, 4.4),
+    ...ObjectSpec.dominoRow(
+      fromX: 4.4,
+      surfaceY: 10.7,
+      count: 5,
+      spacing: 0.58,
+    ),
+    ObjectSpec.ball(7.4, 10.7),
+    ...ObjectSpec.dominoRow(
+      fromX: 5.2,
+      surfaceY: kGroundY,
+      count: 5,
+      spacing: 0.6,
+    ),
+    ObjectSpec.target(8.35, kGroundY, radius: 0.48),
   ],
 );

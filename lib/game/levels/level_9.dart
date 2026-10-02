@@ -3,28 +3,23 @@ import 'dart:ui';
 import '../level_config.dart';
 import 'level_4.dart';
 
-// A ground chain powers a spring that throws the ball onto a high switchback.
+// A raised run-up drops the ball onto a floor spring. The spring sends it to
+// the upper lane, whose ball rolls off to the ground target.
 final level9 = LevelConfig(
   id: 9,
   name: 'Springboard',
-  hint: 'Start below and bounce up to the slope.',
+  hint: 'Send the ball off the ledge onto the spring.',
   theme: neonTheme,
   baseReward: 400,
   objects: [
-    ObjectSpec.box(0.85, kGroundY, starter: true, push: const Offset(14, 0)),
-    ...ObjectSpec.dominoRow(fromX: 1.6, surfaceY: kGroundY, count: 4),
-    ObjectSpec.ball(4.05, kGroundY),
+    ObjectSpec.platform(2.45, 9.3, 4.1),
+    ObjectSpec.box(0.85, 9.3, starter: true, push: const Offset(14, 0)),
+    ...ObjectSpec.dominoRow(fromX: 1.6, surfaceY: 9.3, count: 4),
+    ObjectSpec.ball(4.05, 9.3),
     ObjectSpec.jumper(4.9, kGroundY, w: 1.1),
-    ObjectSpec.platform(4.9, 7.2, 4.6),
-    ...ObjectSpec.dominoRow(fromX: 3.35, surfaceY: 7.2, count: 5),
-    ObjectSpec.ball(6.55, 7.2),
-    ObjectSpec.platform(7.3, 9.35, 3.0, angle: 0.2),
-    for (var i = 0; i < 4; i++)
-      ObjectSpec.domino(6.25 + i * 0.58, 9.14 + i * 0.12, angle: 0.2),
-    ObjectSpec.platform(7.5, 11.4, 3.0, angle: -0.2),
-    ObjectSpec.domino(8.3, 11.24, angle: -0.2),
-    ObjectSpec.domino(7.72, 11.36, angle: -0.2),
-    ObjectSpec.domino(7.14, 11.48, angle: -0.2),
-    ObjectSpec.target(6.15, kGroundY, radius: 0.5),
+    ObjectSpec.platform(4.9, 7.2, 4.8),
+    ...ObjectSpec.dominoRow(fromX: 3.25, surfaceY: 7.2, count: 5),
+    ObjectSpec.ball(6.4, 7.2),
+    ObjectSpec.target(7.65, kGroundY, radius: 0.5),
   ],
 );

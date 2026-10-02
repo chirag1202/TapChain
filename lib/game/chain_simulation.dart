@@ -17,7 +17,6 @@ class ChainSimulation extends ContactListener {
 
   static const double step = 1 / 60;
   static const double gravity = 14;
-  static const double maxChainTime = 25;
   static const double quietNeeded = 1.5;
   static const double quietSpeed = 0.12;
 
@@ -222,9 +221,11 @@ class ChainSimulation extends ContactListener {
       maxSpeed = math.max(maxSpeed, o.body.angularVelocity.abs() * 0.3);
     }
 
-    if (!targetHit && !failed) {
+    // Hitting the target records the win, but the rest of the chain keeps
+    // simulating until it settles so late-moving objects count toward score.
+    if (!failed) {
       _quiet = maxSpeed < quietSpeed ? _quiet + step : 0;
-      if (_quiet >= quietNeeded || time >= maxChainTime) failed = true;
+      if (_quiet >= quietNeeded) failed = true;
     }
   }
 
@@ -243,7 +244,7 @@ class ChainSimulation extends ContactListener {
       final launched = identical(jumper, a) ? b : a;
       if (launched.spec.isDynamic) {
         final horizontal = launched.body.linearVelocity.x
-            .clamp(-2.0, 2.0)
+            .clamp(-0.8, 0.8)
             .toDouble();
         launched.body.linearVelocity = Vector2(horizontal, -15);
         launched.body.setAwake(true);
