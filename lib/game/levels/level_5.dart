@@ -22,7 +22,7 @@ const spaceTheme = LevelTheme(
   glow: true,
 );
 
-// Starts halfway up, then chains through two drops and a downhill ramp.
+// A full row of floor dominoes tips directly into the target.
 final level5 = LevelConfig(
   id: 5,
   name: 'Chain Master',
@@ -30,27 +30,14 @@ final level5 = LevelConfig(
   theme: spaceTheme,
   baseReward: 200,
   objects: [
-    ObjectSpec.platform(1.95, 6.0, 3.3),
     ...ObjectSpec.dominoRow(
-      fromX: 0.8,
-      surfaceY: 6.0,
-      count: 4,
+      fromX: 1.3,
+      surfaceY: kGroundY,
+      count: 8,
       spacing: 0.6,
       firstIsStarter: true,
+      push: const Offset(0.55, 0),
     ),
-    ObjectSpec.ball(3.2, 6.0),
-    ObjectSpec.platform(5.0, 8.8, 4.2),
-    ...ObjectSpec.dominoRow(fromX: 3.5, surfaceY: 8.8, count: 4, spacing: 0.6),
-    ObjectSpec.ball(6.0, 8.8),
-    ObjectSpec.platform(6.6, 11.1, 4.8, angle: -0.25),
-    ObjectSpec.platform(3.9, 12.3, 1.4),
-    ObjectSpec.box(3.21, 12.3),
-    ...ObjectSpec.dominoRow(
-      fromX: 1.5,
-      surfaceY: kGroundY,
-      count: 3,
-      spacing: 0.6,
-    ),
-    ObjectSpec.target(0.65, kGroundY, radius: 0.5),
+    ObjectSpec.target(6.8, kGroundY, radius: 0.5),
   ],
 );

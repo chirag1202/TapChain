@@ -13,7 +13,7 @@ class PhysicsObject {
       _px = body.position.x,
       _py = body.position.y,
       _pa = body.angle;
-
+ 
   final ObjectSpec spec;
   final Body body;
   bool gone = false;

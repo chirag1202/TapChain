@@ -36,11 +36,11 @@ final level4 = LevelConfig(
     ObjectSpec.ball(5.0, 7.4),
     ObjectSpec.platform(2.5, 10.3, 6.0),
     ...ObjectSpec.dominoRow(
-      fromX: 4.8,
+      fromX: 1.0,
       surfaceY: 10.3,
-      count: 6,
-      spacing: -0.6,
+      count: 4,
+      spacing: 0.55,
     ),
-    ObjectSpec.target(0.9, 10.3, radius: 0.48),
+    ObjectSpec.target(3.55, 10.3, radius: 0.48),
   ],
 );

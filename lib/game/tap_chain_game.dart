@@ -82,6 +82,10 @@ class TapChainGame extends FlameGame {
     _oy = topInset + (h - kWorldHeight * _scale) / 2;
   }
 
+  /// Converts a physics-world point to the screen coordinates used by taps.
+  Offset worldToScreen(Offset point) =>
+      Offset(_ox + point.dx * _scale, _oy + point.dy * _scale);
+
   /// Starts the chain only when the authored starter object is tapped.
   void handleTap(Offset screenPosition) {
     if (state != GameState.waiting) return;

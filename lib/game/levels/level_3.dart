@@ -33,13 +33,8 @@ final level3 = LevelConfig(
     ...ObjectSpec.dominoRow(fromX: 1.7, surfaceY: 8.4, count: 4),
     ObjectSpec.ball(4.35, 8.4),
     ObjectSpec.platform(6.4, 11.1, 5.2),
-    ...ObjectSpec.dominoRow(
-      fromX: 4.4,
-      surfaceY: 11.1,
-      count: 5,
-      spacing: 0.58,
-    ),
-    ObjectSpec.ball(7.2, 11.1),
-    ObjectSpec.target(8.15, 11.1, radius: 0.48),
+    ...ObjectSpec.dominoRow(fromX: 4.7, surfaceY: 11.1, count: 5, spacing: 0.5),
+    ObjectSpec.ball(7.5, 11.1),
+    ObjectSpec.target(8.5, 11.1, radius: 0.48),
   ],
 );

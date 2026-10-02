@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flame/game.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tapchain/game/tap_chain_game.dart';
 import 'package:tapchain/main.dart';
 import 'package:tapchain/services/local_storage.dart';
 
@@ -23,10 +25,14 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
     await tester.pump(const Duration(milliseconds: 600));
-    expect(find.text('TAP TO START'), findsWidgets);
+    expect(find.text('TAP AN OBJECT'), findsWidgets);
     expect(find.textContaining(RegExp(r'^\d{1,2}\.\d$')), findsWidgets);
 
-    await tester.tapAt(const Offset(180, 400));
+    final game = tester
+        .widget<GameWidget<TapChainGame>>(find.byType(GameWidget<TapChainGame>))
+        .game!;
+    final starter = game.sim.starter.body.position;
+    await tester.tapAt(game.worldToScreen(Offset(starter.x, starter.y)));
     for (var i = 0; i < 60; i++) {
       await tester.pump(const Duration(milliseconds: 100));
     }
@@ -77,7 +83,7 @@ void main() {
     await tester.tap(find.text('LEVELS').last);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
-    expect(find.byIcon(Icons.lock_rounded), findsNWidgets(4));
+    expect(find.byIcon(Icons.lock_rounded), findsNWidgets(7));
     expect(find.text('Chain Master'), findsOneWidget);
   });
 }

@@ -42,11 +42,11 @@ final level6 = LevelConfig(
     ),
     ObjectSpec.ball(7.4, 10.7),
     ...ObjectSpec.dominoRow(
-      fromX: 5.2,
+      fromX: 5.6,
       surfaceY: kGroundY,
       count: 5,
       spacing: 0.6,
     ),
-    ObjectSpec.target(8.35, kGroundY, radius: 0.48),
+    ObjectSpec.target(4.8, kGroundY, radius: 0.48),
   ],
 );

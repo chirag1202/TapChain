@@ -23,6 +23,7 @@ class ChainSimulation extends ContactListener {
   final LevelConfig config;
   final World world = World(Vector2(0, gravity));
   final List<PhysicsObject> objects = [];
+  final List<PhysicsObject> _pendingJumperLaunches = [];
 
   bool triggered = false;
   bool targetHit = false;
@@ -208,6 +209,25 @@ class ChainSimulation extends ContactListener {
     world.stepDt(step);
     time += step;
 
+    // Contact callbacks run while Forge2D locks the world. Apply spring
+    // launches just after the step so the collision response cannot cancel
+    // the authored boost or hold the ball against the pad.
+    for (final launched in _pendingJumperLaunches) {
+      final jumper = objects.firstWhere((o) => o.isJumper && o.activated);
+      final halfHeight = launched.spec.kind == ObjectKind.ball
+          ? launched.spec.radius
+          : launched.spec.h / 2;
+      final clearY =
+          jumper.body.position.y - jumper.spec.h / 2 - halfHeight - 0.04;
+      launched.body.setTransform(
+        Vector2(launched.body.position.x, clearY),
+        launched.body.angle,
+      );
+      launched.body.linearVelocity = Vector2(1.7, -15);
+      launched.body.setAwake(true);
+    }
+    _pendingJumperLaunches.clear();
+
     var maxSpeed = 0.0;
     for (final o in objects) {
       if (!o.spec.isDynamic || o.gone) continue;
@@ -243,11 +263,7 @@ class ChainSimulation extends ContactListener {
     if (jumper != null && !jumper.activated) {
       final launched = identical(jumper, a) ? b : a;
       if (launched.spec.isDynamic) {
-        final horizontal = launched.body.linearVelocity.x
-            .clamp(-0.8, 0.8)
-            .toDouble();
-        launched.body.linearVelocity = Vector2(horizontal, -15);
-        launched.body.setAwake(true);
+        _pendingJumperLaunches.add(launched);
         jumper.activated = true;
         jumper.flash = 0;
       }
