@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../game/levels/levels.dart';
+
 class LocalStorage {
   LocalStorage._(this._prefs)
     : coins = ValueNotifier(_prefs?.getInt(_coinsKey) ?? 0),
@@ -9,7 +11,7 @@ class LocalStorage {
   static const _coinsKey = 'coins';
   static const _unlockedKey = 'unlockedLevel';
   static const _ftueKey = 'ftueSeen';
-  static const int levelCount = 10;
+  static int get levelCount => allLevels.length;
 
   static late LocalStorage instance;
 
@@ -47,5 +49,5 @@ class LocalStorage {
     _prefs?.setInt(_unlockedKey, level);
   }
 
-  bool isUnlocked(int level) => level <= unlockedLevel.value;
+  bool isUnlocked(int level) => level >= 1 && level <= levelCount;
 }

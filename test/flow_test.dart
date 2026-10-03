@@ -67,7 +67,7 @@ void main() {
     expect(find.text('PLAY'), findsWidgets);
   });
 
-  testWidgets('level select shows locked and unlocked cards', (tester) async {
+  testWidgets('level select has no locked cards during testing', (tester) async {
     SharedPreferences.setMockInitialValues({
       'unlockedLevel': 3,
       'ftueSeen': true,
@@ -83,7 +83,7 @@ void main() {
     await tester.tap(find.text('LEVELS').last);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
-    expect(find.byIcon(Icons.lock_rounded), findsNWidgets(7));
+    expect(find.byIcon(Icons.lock_rounded), findsNothing);
     expect(find.text('Chain Master'), findsOneWidget);
   });
 }

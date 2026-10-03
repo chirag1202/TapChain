@@ -1,0 +1,49 @@
+import 'dart:ui';
+import '../../level_config.dart';
+
+const _generatedTheme = LevelTheme(
+  id: ThemeId.neon,
+  name: 'Neon Night',
+  emoji: '🌃',
+  skyTop: Color(0xFF07072B),
+  skyBottom: Color(0xFF3A0CA3),
+  ground: Color(0xFF14143F),
+  groundTop: Color(0xFF00F5D4),
+  platform: Color(0xFF12123A),
+  platformEdge: Color(0xFF00F5D4),
+  domino: Color(0xFFFF2E93),
+  dominoDot: Color(0xFFFFFFFF),
+  ball: Color(0xFF00E5FF),
+  box: Color(0xFFB5179E),
+  boxEdge: Color(0xFFF72585),
+  target: Color(0xFFFFEE32),
+  accent: Color(0xFF00F5D4),
+  glow: true,
+);
+
+final levelGeneratedJumper6 = LevelConfig(
+  id: 16,
+  name: 'Generated Jumper 6',
+  hint: 'Start the ball midway and launch it up to the target.',
+  theme: _generatedTheme,
+  baseReward: 160,
+  generatorVersion: 1,
+  generationSeed: 1560867871,
+  generationTemplate: 'jumper',
+  generationDifficulty: 6,
+  complexityScore: 6.0,
+  objects: [
+    ObjectSpec.platform(7.0, 9.3, 3.8, h: 0.3, angle: -0.0),
+    ObjectSpec.domino(7.55, 9.3, h: 1.0, angle: -0.0, starter: true, push: Offset(-0.35, 0.0)),
+    ObjectSpec.domino(7.05, 9.3, h: 1.0, angle: -0.0),
+    ObjectSpec.domino(6.55, 9.3, h: 1.0, angle: -0.0),
+    ObjectSpec.domino(6.05, 9.3, h: 1.0, angle: -0.0),
+    ObjectSpec.ball(5.45, 9.3, radius: 0.35),
+    ObjectSpec.jumper(3.0, 14.0, w: 1.2, h: 0.36, direction: -1.0, launchVelocity: -15.0, launchSpeed: 1.7),
+    ObjectSpec.platform(0.9000000000000004, 7.2, 1.8, h: 0.3, angle: -0.0),
+    ObjectSpec.domino(0.5999999999999996, 7.2, h: 1.0, angle: -0.0),
+    ObjectSpec.domino(1.0999999999999996, 7.2, h: 1.0, angle: -0.0),
+    ObjectSpec.domino(1.5999999999999996, 7.2, h: 1.0, angle: -0.0),
+    ObjectSpec.target(2.5999999999999996, 7.200000000000001, radius: 0.48),
+  ],
+);

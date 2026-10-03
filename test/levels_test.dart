@@ -97,6 +97,47 @@ LevelConfig withPush(LevelConfig l, double k) => LevelConfig(
 );
 
 void main() {
+  test('levels 11-20 vary mechanics, slopes, jumpers, and tap height', () {
+    final generated = allLevels.where((level) => level.id >= 11 && level.id <= 20).toList();
+    expect(
+      generated.map((level) => level.generationTemplate).toSet(),
+      containsAll(['slope', 'jumper', 'cascade', 'mechanism']),
+    );
+    expect(generated.any((level) => level.objects.any((o) => o.kind == ObjectKind.jumper)), isTrue);
+    expect(
+      generated.any((level) => level.objects.any((o) => o.kind == ObjectKind.platform && o.angle.abs() > 0.1)),
+      isTrue,
+    );
+    expect(
+      generated.map((level) => level.objects.singleWhere((o) => o.starter).kind).toSet(),
+      contains(ObjectKind.domino),
+    );
+    final starterHeights = generated
+        .map((level) => level.objects.singleWhere((o) => o.starter).y)
+        .toSet();
+    expect(starterHeights.length, greaterThan(3));
+  });
+
+  test('levels 21-30 continue varying puzzles while exposing test objects', () {
+    final generated = allLevels.where((level) => level.id >= 21 && level.id <= 30).toList();
+    expect(
+      generated.map((level) => level.generationTemplate).toSet(),
+      containsAll(['mechanism', 'slope', 'jumper', 'cascade']),
+    );
+    final kinds = generated.expand((level) => level.objects).map((o) => o.kind).toSet();
+    expect(kinds, containsAll([
+      ObjectKind.cat,
+      ObjectKind.dog,
+      ObjectKind.button,
+      ObjectKind.gate,
+      ObjectKind.ramp,
+      ObjectKind.plank,
+      ObjectKind.jumper,
+    ]));
+    final difficulties = generated.map((level) => level.generationDifficulty!).toList();
+    expect(difficulties, orderedEquals(List.generate(10, (index) => index + 1)));
+  });
+
   test('there are thirty levels with exactly one default starter each', () {
     expect(allLevels.length, 30);
     for (final l in allLevels) {

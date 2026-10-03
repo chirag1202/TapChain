@@ -7,11 +7,12 @@ import 'level_config.dart';
 import 'levels/level_3.dart' as drop_template;
 import 'levels/level_9.dart' as spring_template;
 import 'levels/level_6.dart' as cascade_template;
+import 'levels/level_7.dart' as slope_template;
 import 'logical_puzzle.dart';
 
 const int currentGeneratorVersion = 1;
 
-enum LevelTemplate { auto, simpleRelay, drop, spring, cascade, mechanism }
+enum LevelTemplate { auto, simpleRelay, drop, spring, cascade, mechanism, slope, jumper }
 
 /// Request parameters for an offline developer-side generation run.
 class LevelGenerationRequest {
@@ -174,13 +175,12 @@ class LevelGenerator {
   ) {
     final random = _SeededRandom(seed);
     final selectedTemplate = request.template == LevelTemplate.auto
-        ? difficulty <= 2
-              ? LevelTemplate.simpleRelay
-              : difficulty <= 5
-              ? LevelTemplate.drop
-              : difficulty <= 6
-              ? LevelTemplate.spring
-              : LevelTemplate.cascade
+        ? switch ((difficulty - 1) % 4) {
+            0 => LevelTemplate.slope,
+            1 => LevelTemplate.jumper,
+            2 => LevelTemplate.cascade,
+            _ => LevelTemplate.mechanism,
+          }
         : request.template;
     final mirrored = random.nextBool();
     final compact = random.nextBool();
@@ -197,10 +197,20 @@ class LevelGenerator {
       ],
       LevelTemplate.cascade => _cascadeLayout(difficulty),
       LevelTemplate.mechanism => _mechanismLayout(difficulty),
+      LevelTemplate.slope => [
+        for (final object in _slopeLayout())
+          _transform(object, mirrored: mirrored, horizontalScale: scale),
+      ],
+      LevelTemplate.jumper => [
+        for (final object in _jumperLayout(difficulty))
+          _transform(object, mirrored: mirrored, horizontalScale: scale),
+      ],
       LevelTemplate.auto => throw StateError('Auto template was not resolved.'),
     };
     final puzzle = _logicalPuzzle(selectedTemplate);
-    final complexity = _complexity(selectedTemplate, objects, difficulty);
+    final complexity = request.template == LevelTemplate.auto
+        ? difficulty.toDouble()
+        : _complexity(selectedTemplate, objects, difficulty);
     final level = LevelConfig(
       id: request.firstLevelId + acceptedIndex,
       name:
@@ -213,6 +223,8 @@ class LevelGenerator {
           'Guide the ball onto the spring and upper lane.',
         LevelTemplate.cascade => 'Start midway and follow both drops to the target.',
         LevelTemplate.mechanism => 'Use the characters and switch to open the way to the target.',
+        LevelTemplate.slope => 'Start midway and follow the sloped route to the target.',
+        LevelTemplate.jumper => 'Start the ball midway and launch it up to the target.',
         LevelTemplate.auto => 'Follow the chain to the target.',
       },
       theme: request.theme,
@@ -322,6 +334,32 @@ class LevelGenerator {
     return objects;
   }
 
+  List<ObjectSpec> _slopeLayout() =>
+      List<ObjectSpec>.of(slope_template.level7.objects);
+
+  List<ObjectSpec> _jumperLayout(int difficulty) {
+    return [
+      ObjectSpec.platform(2.0, 9.3, 3.8),
+      ...ObjectSpec.dominoRow(
+        fromX: 1.45,
+        surfaceY: 9.3,
+        count: 4,
+        spacing: 0.5,
+        firstIsStarter: true,
+      ),
+      ObjectSpec.ball(3.55, 9.3),
+      ObjectSpec.jumper(6.0, kGroundY, w: 1.2),
+      ObjectSpec.platform(8.1, 7.2, 1.8),
+      ...ObjectSpec.dominoRow(
+        fromX: 8.4,
+        surfaceY: 7.2,
+        count: 3,
+        spacing: -0.5,
+      ),
+      ObjectSpec.target(6.4, 7.2, radius: 0.48),
+    ];
+  }
+
   ObjectSpec _transform(
     ObjectSpec object, {
     required bool mirrored,
@@ -375,6 +413,9 @@ class LevelGenerator {
         object.y + object.h / 2,
         w: object.w * horizontalScale,
         h: object.h,
+        direction: mirrored ? -object.direction : object.direction,
+        launchVelocity: object.launchVelocity,
+        launchSpeed: object.launchSpeed,
       ),
       ObjectKind.target => ObjectSpec.target(
         x(object.x),
@@ -474,6 +515,34 @@ class LevelGenerator {
         PuzzleLink('gate', 'target'),
       ],
     ),
+    LevelTemplate.slope => const LogicalPuzzle(
+      nodes: [
+        PuzzleNode('mid-start', PuzzleNodeType.starter),
+        PuzzleNode('slope-run', PuzzleNodeType.dominoRun),
+        PuzzleNode('drop', PuzzleNodeType.drop),
+        PuzzleNode('lower-route', PuzzleNodeType.dominoRun),
+        PuzzleNode('target', PuzzleNodeType.target),
+      ],
+      links: [
+        PuzzleLink('mid-start', 'slope-run'),
+        PuzzleLink('slope-run', 'drop'),
+        PuzzleLink('drop', 'lower-route'),
+        PuzzleLink('lower-route', 'target'),
+      ],
+    ),
+    LevelTemplate.jumper => const LogicalPuzzle(
+      nodes: [
+        PuzzleNode('mid-ball', PuzzleNodeType.starter),
+        PuzzleNode('jumper', PuzzleNodeType.spring),
+        PuzzleNode('upper-run', PuzzleNodeType.dominoRun),
+        PuzzleNode('target', PuzzleNodeType.target),
+      ],
+      links: [
+        PuzzleLink('mid-ball', 'jumper'),
+        PuzzleLink('jumper', 'upper-run'),
+        PuzzleLink('upper-run', 'target'),
+      ],
+    ),
     LevelTemplate.auto => throw StateError('Auto template was not resolved.'),
   };
 
@@ -496,6 +565,8 @@ class LevelGenerator {
         (objects.any((o) => o.kind == ObjectKind.button) && objects.any((o) => o.kind == ObjectKind.gate) ? 1.2 : 0) +
         (objects.any((o) => o.kind == ObjectKind.ramp) ? 0.8 : 0) +
         (objects.any((o) => o.kind == ObjectKind.plank) ? 0.8 : 0),
+      LevelTemplate.slope => 4.0,
+      LevelTemplate.jumper => 5.0,
       LevelTemplate.auto => 0.0,
     };
     final progression = template == LevelTemplate.cascade
@@ -514,6 +585,8 @@ class LevelGenerator {
     LevelTemplate.spring => 'Spring',
     LevelTemplate.cascade => 'Cascade',
     LevelTemplate.mechanism => 'Mechanism',
+    LevelTemplate.slope => 'Slope',
+    LevelTemplate.jumper => 'Jumper',
     LevelTemplate.auto => 'Puzzle',
   };
 

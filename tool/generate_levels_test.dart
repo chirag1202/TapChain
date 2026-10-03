@@ -25,7 +25,7 @@ const _themeName = String.fromEnvironment(
 );
 const _templateName = String.fromEnvironment(
   'TAPCHAIN_TEMPLATE',
-  defaultValue: 'cascade',
+  defaultValue: 'auto',
 );
 const _progressiveDifficulty = bool.fromEnvironment(
   'TAPCHAIN_PROGRESSIVE',

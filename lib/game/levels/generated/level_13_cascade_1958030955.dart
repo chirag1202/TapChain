@@ -31,7 +31,7 @@ final levelGeneratedCascade3 = LevelConfig(
   generationSeed: 1958030955,
   generationTemplate: 'cascade',
   generationDifficulty: 3,
-  complexityScore: 5.15,
+  complexityScore: 3.0,
   objects: [
     ObjectSpec.domino(0.95, 8.0, h: 1.0, angle: 0.0, starter: true, push: Offset(0.35, 0.0)),
     ObjectSpec.platform(6.0, 10.7, 4.4, h: 0.3, angle: 0.0),

@@ -45,6 +45,14 @@ class ChainSimulation extends ContactListener {
 
   int get fallenObjectCount => objects.where((o) => o.hasFallen).length;
 
+  int get touchedObjectCount => objects.where((o) => o.spec.isDynamic && o.touched).length;
+
+  bool get allDynamicObjectsTouched => touchedObjectCount == totalDynamicObjects;
+
+  /// Gameplay may finish once the target and every dynamic object have been
+  /// contacted, without waiting for their remaining momentum to settle.
+  bool get completed => targetHit && allDynamicObjectsTouched;
+
   /// Fraction of the next fixed step already elapsed, for render interpolation.
   double get alpha => triggered ? _acc / step : 0;
 
@@ -153,6 +161,7 @@ class ChainSimulation extends ContactListener {
               });
     if (tapped == null) return false;
     triggered = true;
+    tapped.touched = true;
     _launch(tapped);
     return true;
   }
@@ -224,6 +233,7 @@ class ChainSimulation extends ContactListener {
     while (_acc >= step) {
       _acc -= step;
       _stepOnce();
+      if (completed) break;
     }
     for (final o in objects) {
       if (o.flash >= 0) o.flash += dt;
@@ -262,7 +272,10 @@ class ChainSimulation extends ContactListener {
         Vector2(launched.body.position.x, clearY),
         launched.body.angle,
       );
-      launched.body.linearVelocity = Vector2(1.7, -15);
+      launched.body.linearVelocity = Vector2(
+        jumper.spec.direction * jumper.spec.launchSpeed,
+        jumper.spec.launchVelocity,
+      );
       launched.body.setAwake(true);
     }
     _pendingJumperLaunches.clear();
@@ -309,6 +322,8 @@ class ChainSimulation extends ContactListener {
     final a = contact.fixtureA.body.userData as PhysicsObject?;
     final b = contact.fixtureB.body.userData as PhysicsObject?;
     if (a == null || b == null) return;
+    if (a.spec.isDynamic) a.touched = true;
+    if (b.spec.isDynamic) b.touched = true;
 
     final jumper = a.isJumper
         ? a
@@ -352,6 +367,7 @@ class ChainSimulation extends ContactListener {
     final other = aTarget ? b : a;
     if (!other.spec.isDynamic) return;
     targetHit = true;
+    target.touched = true;
     hitTime = time;
     target.flash = 0;
     // Character motors stop with the successful chain so the game can enter

@@ -21,17 +21,17 @@ const _generatedTheme = LevelTheme(
   glow: true,
 );
 
-final levelGeneratedMechanism6 = LevelConfig(
-  id: 26,
-  name: 'Generated Mechanism 6',
+final levelGeneratedMechanism1 = LevelConfig(
+  id: 24,
+  name: 'Generated Mechanism 1',
   hint: 'Use the characters and switch to open the way to the target.',
   theme: _generatedTheme,
-  baseReward: 160,
+  baseReward: 140,
   generatorVersion: 1,
-  generationSeed: 702189614,
+  generationSeed: 717467558,
   generationTemplate: 'mechanism',
-  generationDifficulty: 6,
-  complexityScore: 9.049999999999999,
+  generationDifficulty: 4,
+  complexityScore: 4.0,
   objects: [
     ObjectSpec.domino(1.2, 14.0, h: 1.0, angle: 0.0, starter: true, push: Offset(0.35, 0.0)),
     ObjectSpec.domino(1.76, 14.0, h: 1.0, angle: 0.0),
@@ -43,7 +43,7 @@ final levelGeneratedMechanism6 = LevelConfig(
     ObjectSpec.cat(5.670000000000001, 14.0, direction: 1.0),
     ObjectSpec.button(6.5200000000000005, 13.88, w: 0.55, h: 0.2, id: 'switch-a', linkedTargetId: 'gate-a'),
     ObjectSpec.gate(7.170000000000001, 13.2, w: 0.25, h: 1.6, id: 'gate-a'),
-    ObjectSpec.ramp(0.5, 13.9, 0.8, h: 0.22, angle: -0.16),
+    ObjectSpec.ramp(0.5, 13.9, 0.8, h: 0.22, angle: -0.18),
     ObjectSpec.target(8.45, 14.0, radius: 0.48),
   ],
 );

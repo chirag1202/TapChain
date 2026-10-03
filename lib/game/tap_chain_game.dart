@@ -122,7 +122,7 @@ class TapChainGame extends FlameGame {
     final simDt = frameDt * playbackSpeed;
     if (state == GameState.running) {
       sim.update(simDt);
-      if (sim.failed) {
+      if (sim.completed || sim.failed) {
         state = sim.targetHit ? GameState.success : GameState.failed;
         if (sim.targetHit) {
           result = LevelResult(

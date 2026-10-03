@@ -20,6 +20,7 @@ class PhysicsObject {
   bool activated = false;
   bool running = false;
   bool open = false;
+  bool touched = false;
   double flash = -1; // seconds since the target was hit, <0 means never
   final Vector2 initialPosition;
   final double initialAngle;

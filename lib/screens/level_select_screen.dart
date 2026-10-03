@@ -55,7 +55,7 @@ class LevelSelectScreen extends StatelessWidget {
                                 _LevelCard(
                                   level: level,
                                   width: cardW,
-                                  unlocked: level.id <= unlocked,
+                                  unlocked: LocalStorage.instance.isUnlocked(level.id),
                                 ),
                             ],
                           ),

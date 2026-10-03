@@ -64,6 +64,8 @@ class ObjectSpec {
     this.starter = false,
     this.push = Offset.zero,
     this.direction = 1,
+    this.launchVelocity = -15,
+    this.launchSpeed = 1.7,
     this.id,
     this.linkedTargetId,
   });
@@ -154,7 +156,10 @@ class ObjectSpec {
     double surfaceY, {
     double w = 1.0,
     double h = 0.36,
-  }) : this._(kind: ObjectKind.jumper, x: x, y: surfaceY - h / 2, w: w, h: h);
+    double direction = 1,
+    double launchVelocity = -15,
+    double launchSpeed = 1.7,
+  }) : this._(kind: ObjectKind.jumper, x: x, y: surfaceY - h / 2, w: w, h: h, direction: direction, launchVelocity: launchVelocity, launchSpeed: launchSpeed);
 
   /// A character rests on [surfaceY] and runs after a physics hit.
   const ObjectSpec.cat(double x, double surfaceY, {double direction = 1})
@@ -193,6 +198,8 @@ class ObjectSpec {
   /// Authored launch impulse used for this level's default starter.
   final Offset push;
   final double direction;
+  final double launchVelocity;
+  final double launchSpeed;
   final String? id;
   final String? linkedTargetId;
 
@@ -215,6 +222,8 @@ class ObjectSpec {
     starter: starter,
     push: push * k,
     direction: direction,
+    launchVelocity: launchVelocity,
+    launchSpeed: launchSpeed,
     id: id,
     linkedTargetId: linkedTargetId,
   );

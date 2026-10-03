@@ -31,12 +31,15 @@ void main() {
   });
 
   group('local storage', () {
-    test('level 1 is unlocked at first and unlocking persists', () async {
+    test('all levels are unlocked while progress tracking remains intact', () async {
       SharedPreferences.setMockInitialValues({});
       await LocalStorage.init();
       var s = LocalStorage.instance;
       expect(s.isUnlocked(1), isTrue);
-      expect(s.isUnlocked(2), isFalse);
+      expect(s.isUnlocked(2), isTrue);
+      expect(s.isUnlocked(LocalStorage.levelCount), isTrue);
+      expect(s.isUnlocked(LocalStorage.levelCount + 1), isFalse);
+      expect(s.unlockedLevel.value, 1);
 
       s.unlock(2);
       s.addCoins(125);
@@ -44,17 +47,19 @@ void main() {
       await LocalStorage.init();
       s = LocalStorage.instance;
       expect(s.isUnlocked(2), isTrue);
-      expect(s.isUnlocked(3), isFalse);
+      expect(s.isUnlocked(3), isTrue);
+      expect(s.isUnlocked(LocalStorage.levelCount), isTrue);
+      expect(s.unlockedLevel.value, 2);
       expect(s.coins.value, 125);
     });
 
-    test('unlock never goes backwards or past the last level', () async {
+    test('testing unlock state covers the full current level list', () async {
       SharedPreferences.setMockInitialValues({'unlockedLevel': 4});
       await LocalStorage.init();
       final s = LocalStorage.instance
         ..unlock(2)
         ..unlock(11);
-      expect(s.unlockedLevel.value, 4);
+      expect(s.unlockedLevel.value, 11);
     });
   });
 }

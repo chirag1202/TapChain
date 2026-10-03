@@ -99,7 +99,8 @@ class LevelExporter {
             'h: ${object.h}, angle: ${object.angle})',
       ObjectKind.jumper =>
         'ObjectSpec.jumper(${object.x}, ${object.y + object.h / 2}, '
-            'w: ${object.w}, h: ${object.h})',
+            'w: ${object.w}, h: ${object.h}, direction: ${object.direction}, '
+            'launchVelocity: ${object.launchVelocity}, launchSpeed: ${object.launchSpeed})',
       ObjectKind.target =>
         'ObjectSpec.target(${object.x}, ${object.y + object.radius}, '
             'radius: ${object.radius})',
