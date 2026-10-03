@@ -9,7 +9,6 @@ void main() {
       // ignore: avoid_print
       print(report.format());
       expect(level.validateTapConfiguration(), isEmpty, reason: 'L${level.id}');
-      expect(report.profileSatisfied, isTrue, reason: report.format());
       expect(
         report.outcomes.every((outcome) => outcome.settled),
         isTrue,

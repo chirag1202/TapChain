@@ -24,6 +24,26 @@ enum ObjectKind {
 /// it never changes simulation or tap eligibility.
 enum TapChoiceProfile { broad, narrow, exact }
 
+/// Authoring intent for a deliberately designed puzzle. It documents the
+/// physical route and decoys; the simulator never reads it to alter physics.
+class LevelDesignSpec {
+  const LevelDesignSpec({
+    required this.idea,
+    required this.intendedTapIds,
+    required this.decoys,
+    required this.chain,
+    required this.reasoningPrompt,
+    required this.complexity,
+  });
+
+  final String idea;
+  final List<String> intendedTapIds;
+  final List<String> decoys;
+  final List<String> chain;
+  final String reasoningPrompt;
+  final List<String> complexity;
+}
+
 extension TapChoiceProfileRules on TapChoiceProfile {
   bool accepts(int successfulChoices) => switch (this) {
     TapChoiceProfile.broad => successfulChoices >= 4,
@@ -406,6 +426,7 @@ class LevelConfig {
     this.complexityScore,
     this.tapCandidates,
     this.tapChoiceProfile,
+    this.design,
   });
 
   final int id;
@@ -429,6 +450,9 @@ class LevelConfig {
 
   /// Optional design target checked by developer-side tap audits only.
   final TapChoiceProfile? tapChoiceProfile;
+
+  /// Documentation-only puzzle intent, independent of tap-count results.
+  final LevelDesignSpec? design;
 
   String objectIdAt(int index) {
     final object = objects[index];
