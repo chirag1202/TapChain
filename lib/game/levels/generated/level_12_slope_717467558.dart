@@ -21,17 +21,17 @@ const _generatedTheme = LevelTheme(
   glow: true,
 );
 
-final levelGeneratedSlope6 = LevelConfig(
-  id: 29,
-  name: 'Generated Slope 6',
+final levelGeneratedSlope1 = LevelConfig(
+  id: 12,
+  name: 'Generated Slope 1',
   hint: 'Start midway and follow the sloped route to the target.',
   theme: _generatedTheme,
-  baseReward: 190,
+  baseReward: 110,
   generatorVersion: 1,
-  generationSeed: 1823089495,
+  generationSeed: 717467558,
   generationTemplate: 'slope',
-  generationDifficulty: 9,
-  complexityScore: 9.0,
+  generationDifficulty: 1,
+  complexityScore: 1.0,
   objects: [
     ObjectSpec.platform(7.05, 6.0, 3.3, h: 0.3, angle: 0.0),
     ObjectSpec.domino(8.2, 6.0, h: 1.0, angle: 0.0, starter: true, push: Offset(-0.35, 0.0)),

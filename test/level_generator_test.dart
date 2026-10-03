@@ -75,8 +75,8 @@ void main() {
     expect(medium.candidates, hasLength(1));
     expect(hard.candidates, hasLength(1));
     expect(easy.candidates.single.definition.template, 'slope');
-    expect(medium.candidates.single.definition.template, 'mechanism');
-    expect(hard.candidates.single.definition.template, 'jumper');
+    expect(medium.candidates.single.definition.template, 'cascade');
+    expect(hard.candidates.single.definition.template, 'cascade');
     expect(
       hard.candidates.single.definition.complexityScore,
       greaterThan(easy.candidates.single.definition.complexityScore),
@@ -286,7 +286,7 @@ void main() {
     final generated = generator.generateLevels(request).candidates.first;
     final source = const LevelExporter().toDart(generated);
     expect(source, contains("import '../../level_config.dart';"));
-    expect(source, contains('final levelGeneratedJumper1 = LevelConfig('));
+    expect(source, contains('final levelGeneratedSpring1 = LevelConfig('));
     expect(source, contains('generationSeed: ${generated.definition.seed}'));
     expect(source, contains('ObjectSpec.domino('));
     expect(source, contains('ObjectSpec.target('));

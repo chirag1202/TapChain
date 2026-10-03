@@ -22,7 +22,7 @@ const _generatedTheme = LevelTheme(
 );
 
 final levelGeneratedJumper2 = LevelConfig(
-  id: 12,
+  id: 13,
   name: 'Generated Jumper 2',
   hint: 'Start the ball midway and launch it up to the target.',
   theme: _generatedTheme,

@@ -10,25 +10,25 @@ import 'level_8.dart';
 import 'level_9.dart';
 import 'level_10.dart';
 import 'generated/level_11_slope_717467558.dart';
-import 'generated/level_12_jumper_970934174.dart';
-import 'generated/level_13_cascade_1958030955.dart';
-import 'generated/level_14_mechanism_2122120248.dart' as level14;
-import 'generated/level_15_slope_2000078150.dart';
-import 'generated/level_16_jumper_1560867871.dart';
-import 'generated/level_17_cascade_853667516.dart';
-import 'generated/level_18_mechanism_1777331488.dart' as level18;
-import 'generated/level_19_slope_1823089495.dart';
-import 'generated/level_20_jumper_819605975.dart';
-import 'generated/level_21_mechanism_717467558.dart';
-import 'generated/level_22_mechanism_970934174.dart';
-import 'generated/level_23_mechanism_1958030955.dart';
-import 'generated/level_24_mechanism_717467558.dart' as level24;
-import 'generated/level_25_slope_2000078150.dart' as level25;
-import 'generated/level_26_jumper_1560867871.dart' as level26;
+import 'generated/level_12_slope_717467558.dart' as level12;
+import 'generated/level_13_jumper_970934174.dart' as level13;
+import 'generated/level_14_mechanism_1958030955.dart' as level14;
+import 'generated/level_15_cascade_2122120248.dart' as level15;
+import 'generated/level_16_drop_1589622154.dart' as level16;
+import 'generated/level_17_spring_240501474.dart' as level17;
+import 'generated/level_18_slope_2000078150.dart' as level18;
+import 'generated/level_19_jumper_1548755915.dart' as level19;
+import 'generated/level_20_mechanism_1560867871.dart' as level20;
+import 'generated/level_21_cascade_853667516.dart' as level21;
+import 'generated/level_22_drop_717467558.dart' as level22;
+import 'generated/level_23_spring_240501474.dart' as level23;
+import 'generated/level_24_slope_2000078150.dart' as level24;
+import 'generated/level_25_jumper_1548755915.dart' as level25;
+import 'generated/level_26_mechanism_1560867871.dart' as level26;
 import 'generated/level_27_cascade_853667516.dart' as level27;
-import 'generated/level_28_mechanism_1777331488.dart' as level28;
-import 'generated/level_29_slope_1823089495.dart' as level29;
-import 'generated/level_30_jumper_819605975.dart' as level30;
+import 'generated/level_28_drop_1777331488.dart' as level28;
+import 'generated/level_29_spring_1287140672.dart' as level29;
+import 'generated/level_30_slope_1823089495.dart' as level30;
 
 final List<LevelConfig> allLevels = [
   level1,
@@ -42,23 +42,23 @@ final List<LevelConfig> allLevels = [
   level9,
   level10,
   levelGeneratedSlope1,
-  levelGeneratedJumper2,
-  levelGeneratedCascade3,
-  level14.levelGeneratedMechanism4,
-  levelGeneratedSlope5,
-  levelGeneratedJumper6,
-  levelGeneratedCascade7,
-  level18.levelGeneratedMechanism8,
-  levelGeneratedSlope9,
-  levelGeneratedJumper10,
-  levelGeneratedMechanism1,
-  levelGeneratedMechanism2,
-  levelGeneratedMechanism3,
-  level24.levelGeneratedMechanism1,
-  level25.levelGeneratedSlope2,
-  level26.levelGeneratedJumper3,
-  level27.levelGeneratedCascade4,
-  level28.levelGeneratedMechanism5,
-  level29.levelGeneratedSlope6,
-  level30.levelGeneratedJumper7,
+  level12.levelGeneratedSlope1,
+  level13.levelGeneratedJumper2,
+  level14.levelGeneratedMechanism3,
+  level15.levelGeneratedCascade4,
+  level16.levelGeneratedDrop5,
+  level17.levelGeneratedSpring6,
+  level18.levelGeneratedSlope7,
+  level19.levelGeneratedJumper8,
+  level20.levelGeneratedMechanism9,
+  level21.levelGeneratedCascade10,
+  level22.levelGeneratedDrop1,
+  level23.levelGeneratedSpring2,
+  level24.levelGeneratedSlope3,
+  level25.levelGeneratedJumper4,
+  level26.levelGeneratedMechanism5,
+  level27.levelGeneratedCascade6,
+  level28.levelGeneratedDrop7,
+  level29.levelGeneratedSpring8,
+  level30.levelGeneratedSlope9,
 ];

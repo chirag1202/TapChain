@@ -106,17 +106,17 @@ class LevelGenerator {
 
   GenerationResult generateLevels(LevelGenerationRequest request) {
     if (request.count < 1) throw ArgumentError.value(request.count, 'count');
-    if (request.difficulty < 1 || request.difficulty > 10) {
-      throw ArgumentError.value(request.difficulty, 'difficulty', 'Use 1–10.');
+    if (request.difficulty < 1 || request.difficulty > 20) {
+      throw ArgumentError.value(request.difficulty, 'difficulty', 'Use 1–20.');
     }
     final finalDifficulty =
         request.difficulty +
         (request.progressiveDifficulty ? request.count - 1 : 0);
-    if (finalDifficulty > 10) {
+    if (finalDifficulty > 20) {
       throw ArgumentError.value(
         finalDifficulty,
         'difficulty progression',
-        'The final generated difficulty must be 10 or less.',
+        'The final generated difficulty must be 20 or less.',
       );
     }
     if (request.maxAttemptsPerLevel < 1) {
@@ -175,11 +175,13 @@ class LevelGenerator {
   ) {
     final random = _SeededRandom(seed);
     final selectedTemplate = request.template == LevelTemplate.auto
-        ? switch ((difficulty - 1) % 4) {
+        ? switch ((difficulty - 1) % 6) {
             0 => LevelTemplate.slope,
             1 => LevelTemplate.jumper,
-            2 => LevelTemplate.cascade,
-            _ => LevelTemplate.mechanism,
+            2 => LevelTemplate.mechanism,
+            3 => LevelTemplate.cascade,
+            4 => LevelTemplate.drop,
+            _ => LevelTemplate.spring,
           }
         : request.template;
     final mirrored = random.nextBool();
@@ -278,12 +280,12 @@ class LevelGenerator {
   }
 
   List<ObjectSpec> _cascadeLayout(int difficulty) {
-    // Level 6 is a physics-tested two-drop chain. Grow its connected ground
-    // relay for the first six steps, then extend the upper relay (known to
-    // remain within the platform) for the final four.
+    // Level 6 is a physics-tested two-drop chain. Extend both connected
+    // relays as difficulty rises, preserving the two drops and their contact
+    // order so the extra pieces add decisions without breaking the solution.
     final groundExtra = difficulty <= 6 ? difficulty : 6;
-    final upperExtra = difficulty <= 6 ? 0 : 1;
-    final rightExtra = difficulty <= 6 ? 0 : 1;
+    final upperExtra = difficulty < 4 ? 0 : difficulty < 8 ? 1 : 2;
+    final rightExtra = difficulty < 5 ? 0 : 1;
     final targetX = 4.2 - (groundExtra - 1) * 0.6;
     final upperCount = 4 + upperExtra;
     final ballX = 1.55 + (upperCount - 1) * 0.6 + 0.8;
@@ -308,7 +310,8 @@ class LevelGenerator {
     // A grounded, deterministic character-switch-gate chain. The ball tips a
     // relay, reaches the cat, and the cat runs over the linked switch to open
     // the gate. Ramp and plank add physical route elements in later variants.
-    final dominoCount = 4 + (difficulty ~/ 4);
+    final mechanicStep = difficulty > 10 ? difficulty - 10 : difficulty;
+    final dominoCount = 4 + (mechanicStep >= 6 ? 1 : 0);
     final ballX = 1.2 + (dominoCount - 1) * 0.56 + 0.55;
     final dogX = ballX + 0.78;
     final catX = dogX + 0.9;
@@ -327,8 +330,10 @@ class LevelGenerator {
       ObjectSpec.cat(catX, kGroundY, direction: 1),
       ObjectSpec.button(buttonX, kGroundY - 0.12, id: 'switch-a', linkedTargetId: 'gate-a'),
       ObjectSpec.gate(gateX, kGroundY - 0.8, id: 'gate-a'),
-      if (difficulty >= 4) ObjectSpec.ramp(0.5, 13.9, 0.8, angle: -0.22 + difficulty * 0.01),
-      if (difficulty <= 3) ObjectSpec.plank(7.25, kGroundY, length: 0.7),
+      // Increasingly varied grounded hardware gives later routes more
+      // collision choices while keeping the switch and gate chain readable.
+      ObjectSpec.ramp(0.55, 13.88, 0.9, angle: -0.24 + mechanicStep * 0.012),
+      if (mechanicStep <= 5) ObjectSpec.plank(7.25, kGroundY, length: 0.7),
       ObjectSpec.target(8.45, kGroundY, radius: 0.48),
     ];
     return objects;
@@ -338,16 +343,22 @@ class LevelGenerator {
       List<ObjectSpec>.of(slope_template.level7.objects);
 
   List<ObjectSpec> _jumperLayout(int difficulty) {
+    final addedFeedDominoes = difficulty >= 5 ? 1 : 0;
+    final feedCount = 4 + addedFeedDominoes;
     return [
-      ObjectSpec.platform(2.0, 9.3, 3.8),
+      ObjectSpec.platform(
+        2.0 + addedFeedDominoes * 0.25,
+        9.3,
+        3.8 + addedFeedDominoes * 0.5,
+      ),
       ...ObjectSpec.dominoRow(
         fromX: 1.45,
         surfaceY: 9.3,
-        count: 4,
+        count: feedCount,
         spacing: 0.5,
         firstIsStarter: true,
       ),
-      ObjectSpec.ball(3.55, 9.3),
+      ObjectSpec.ball(3.55 + addedFeedDominoes * 0.5, 9.3),
       ObjectSpec.jumper(6.0, kGroundY, w: 1.2),
       ObjectSpec.platform(8.1, 7.2, 1.8),
       ...ObjectSpec.dominoRow(

@@ -21,20 +21,21 @@ const _generatedTheme = LevelTheme(
   glow: true,
 );
 
-final levelGeneratedJumper3 = LevelConfig(
-  id: 26,
-  name: 'Generated Jumper 3',
-  hint: 'Start the ball midway and launch it up to the target.',
+final levelGeneratedSpring2 = LevelConfig(
+  id: 23,
+  name: 'Generated Spring 2',
+  hint: 'Guide the ball onto the spring and upper lane.',
   theme: _generatedTheme,
-  baseReward: 160,
+  baseReward: 220,
   generatorVersion: 1,
-  generationSeed: 1560867871,
-  generationTemplate: 'jumper',
-  generationDifficulty: 6,
-  complexityScore: 6.0,
+  generationSeed: 240501474,
+  generationTemplate: 'spring',
+  generationDifficulty: 12,
+  complexityScore: 12.0,
   objects: [
     ObjectSpec.platform(7.0, 9.3, 3.8, h: 0.3, angle: -0.0),
-    ObjectSpec.domino(7.55, 9.3, h: 1.0, angle: -0.0, starter: true, push: Offset(-0.35, 0.0)),
+    ObjectSpec.box(8.15, 9.3, w: 0.9, h: 0.9, starter: true, push: Offset(-14.0, 0.0)),
+    ObjectSpec.domino(7.55, 9.3, h: 1.0, angle: -0.0),
     ObjectSpec.domino(7.05, 9.3, h: 1.0, angle: -0.0),
     ObjectSpec.domino(6.55, 9.3, h: 1.0, angle: -0.0),
     ObjectSpec.domino(6.05, 9.3, h: 1.0, angle: -0.0),

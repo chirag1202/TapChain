@@ -135,7 +135,19 @@ void main() {
       ObjectKind.jumper,
     ]));
     final difficulties = generated.map((level) => level.generationDifficulty!).toList();
-    expect(difficulties, orderedEquals(List.generate(10, (index) => index + 1)));
+    expect(difficulties, orderedEquals(List.generate(10, (index) => index + 10)));
+  });
+
+  test('levels 12-30 raise difficulty across six varied route types', () {
+    final generated = allLevels.where((level) => level.id >= 12 && level.id <= 30).toList();
+    expect(
+      generated.map((level) => level.generationDifficulty!),
+      orderedEquals(List.generate(19, (index) => index + 1)),
+    );
+    expect(
+      generated.map((level) => level.generationTemplate).toSet(),
+      containsAll(['slope', 'jumper', 'mechanism', 'cascade', 'drop', 'spring']),
+    );
   });
 
   test('there are thirty levels with exactly one default starter each', () {

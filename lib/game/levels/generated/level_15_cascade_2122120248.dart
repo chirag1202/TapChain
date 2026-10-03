@@ -21,17 +21,17 @@ const _generatedTheme = LevelTheme(
   glow: true,
 );
 
-final levelGeneratedCascade7 = LevelConfig(
-  id: 17,
-  name: 'Generated Cascade 7',
+final levelGeneratedCascade4 = LevelConfig(
+  id: 15,
+  name: 'Generated Cascade 4',
   hint: 'Start midway and follow both drops to the target.',
   theme: _generatedTheme,
-  baseReward: 170,
+  baseReward: 140,
   generatorVersion: 1,
-  generationSeed: 853667516,
+  generationSeed: 2122120248,
   generationTemplate: 'cascade',
-  generationDifficulty: 7,
-  complexityScore: 7.0,
+  generationDifficulty: 4,
+  complexityScore: 4.0,
   objects: [
     ObjectSpec.domino(0.95, 8.0, h: 1.0, angle: 0.0, starter: true, push: Offset(0.35, 0.0)),
     ObjectSpec.platform(6.0, 10.7, 4.4, h: 0.3, angle: 0.0),
@@ -57,9 +57,6 @@ final levelGeneratedCascade7 = LevelConfig(
     ObjectSpec.domino(4.4, 14.0, h: 1.0, angle: 0.0),
     ObjectSpec.domino(3.8, 14.0, h: 1.0, angle: 0.0),
     ObjectSpec.domino(3.2, 14.0, h: 1.0, angle: 0.0),
-    ObjectSpec.domino(2.6, 14.0, h: 1.0, angle: 0.0),
-    ObjectSpec.domino(2.0, 14.0, h: 1.0, angle: 0.0),
-    ObjectSpec.domino(8.6, 14.0, h: 1.0, angle: 0.0),
-    ObjectSpec.target(1.2000000000000002, 14.0, radius: 0.48),
+    ObjectSpec.target(2.4000000000000004, 14.0, radius: 0.48),
   ],
 );
