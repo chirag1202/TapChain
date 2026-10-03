@@ -5,7 +5,10 @@ const double kWorldWidth = 9;
 const double kWorldHeight = 16;
 const double kGroundY = 14; // top surface of the floor
 
-enum ObjectKind { domino, ball, box, platform, jumper, target }
+enum ObjectKind {
+  domino, ball, box, platform, jumper, target,
+  cat, dog, ramp, button, gate, plank,
+}
 
 enum ThemeId { garden, workshop, construction, neon, space, ocean, volcano }
 
@@ -60,6 +63,9 @@ class ObjectSpec {
     this.angle = 0,
     this.starter = false,
     this.push = Offset.zero,
+    this.direction = 1,
+    this.id,
+    this.linkedTargetId,
   });
 
   /// Domino standing on a surface at [surfaceY]; x is the centre.
@@ -150,6 +156,29 @@ class ObjectSpec {
     double h = 0.36,
   }) : this._(kind: ObjectKind.jumper, x: x, y: surfaceY - h / 2, w: w, h: h);
 
+  /// A character rests on [surfaceY] and runs after a physics hit.
+  const ObjectSpec.cat(double x, double surfaceY, {double direction = 1})
+    : this._(kind: ObjectKind.cat, x: x, y: surfaceY - 0.3, w: 0.72, h: 0.6, direction: direction);
+
+  const ObjectSpec.dog(double x, double surfaceY, {double direction = 1})
+    : this._(kind: ObjectKind.dog, x: x, y: surfaceY - 0.34, w: 0.82, h: 0.68, direction: direction);
+
+  /// Static angled physical surface. Positive angles slope down to the right.
+  factory ObjectSpec.ramp(double x, double y, double length, {double angle = 0.35, double h = 0.22}) =>
+      ObjectSpec._(kind: ObjectKind.ramp, x: x, y: y, w: length, h: h, angle: angle);
+
+  /// Contact sensor that opens the gate named by [linkedTargetId].
+  const ObjectSpec.button(double x, double y, {double w = 0.55, double h = 0.2, String? id, String? linkedTargetId})
+    : this._(kind: ObjectKind.button, x: x, y: y, w: w, h: h, id: id, linkedTargetId: linkedTargetId);
+
+  /// Static collision barrier; linked buttons deactivate it when pressed.
+  const ObjectSpec.gate(double x, double y, {double w = 0.25, double h = 1.6, String? id})
+    : this._(kind: ObjectKind.gate, x: x, y: y, w: w, h: h, id: id);
+
+  /// Dynamic plank that tips and can bridge a gap.
+  const ObjectSpec.plank(double x, double surfaceY, {double length = 2.0, double h = 0.2, double angle = 0})
+    : this._(kind: ObjectKind.plank, x: x, y: surfaceY - h / 2, w: length, h: h, angle: angle);
+
   final ObjectKind kind;
   final double x;
   final double y;
@@ -163,11 +192,17 @@ class ObjectSpec {
 
   /// Authored launch impulse used for this level's default starter.
   final Offset push;
+  final double direction;
+  final String? id;
+  final String? linkedTargetId;
 
   bool get isDynamic =>
       kind == ObjectKind.domino ||
       kind == ObjectKind.ball ||
-      kind == ObjectKind.box;
+      kind == ObjectKind.box ||
+      kind == ObjectKind.cat ||
+      kind == ObjectKind.dog ||
+      kind == ObjectKind.plank;
 
   ObjectSpec withPushScale(double k) => ObjectSpec._(
     kind: kind,
@@ -179,6 +214,9 @@ class ObjectSpec {
     angle: angle,
     starter: starter,
     push: push * k,
+    direction: direction,
+    id: id,
+    linkedTargetId: linkedTargetId,
   );
 
   /// A row of dominoes from [fromX], spaced by [spacing].

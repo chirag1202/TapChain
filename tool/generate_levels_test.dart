@@ -61,7 +61,7 @@ void main() {
     );
     if (template.isEmpty) {
       fail(
-        'Unknown TAPCHAIN_TEMPLATE "$_templateName". Use auto, simpleRelay, drop, spring, or cascade.',
+        'Unknown TAPCHAIN_TEMPLATE "$_templateName". Use auto, simpleRelay, drop, spring, cascade, or mechanism.',
       );
     }
 

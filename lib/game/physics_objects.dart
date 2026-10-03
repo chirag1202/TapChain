@@ -18,6 +18,8 @@ class PhysicsObject {
   final Body body;
   bool gone = false;
   bool activated = false;
+  bool running = false;
+  bool open = false;
   double flash = -1; // seconds since the target was hit, <0 means never
   final Vector2 initialPosition;
   final double initialAngle;
@@ -26,6 +28,9 @@ class PhysicsObject {
 
   bool get isTarget => spec.kind == ObjectKind.target;
   bool get isJumper => spec.kind == ObjectKind.jumper;
+  bool get isButton => spec.kind == ObjectKind.button;
+  bool get isGate => spec.kind == ObjectKind.gate;
+  bool get isCharacter => spec.kind == ObjectKind.cat || spec.kind == ObjectKind.dog;
 
   bool get hasFallen {
     if (!spec.isDynamic) return false;
@@ -68,6 +73,20 @@ class Materials {
 
   static FixtureDef jumper(Shape s) =>
       FixtureDef(s, density: 0, friction: 0.2, restitution: 0.85);
+
+  static FixtureDef character(Shape s) =>
+      FixtureDef(s, density: 1.2, friction: 0.75, restitution: 0);
+
+  static FixtureDef plank(Shape s) =>
+      FixtureDef(s, density: 1.5, friction: 0.65, restitution: 0.02);
+
+  static FixtureDef ramp(Shape s) =>
+      FixtureDef(s, density: 0, friction: 0.65, restitution: 0.02);
+
+  static FixtureDef button(Shape s) => FixtureDef(s, density: 0, isSensor: true);
+
+  static FixtureDef gate(Shape s) =>
+      FixtureDef(s, density: 0, friction: 0.5, restitution: 0);
 }
 
 /// Draws one object centred on the origin of [c]; caller applies translate and rotate.
@@ -80,6 +99,8 @@ void paintObject(
   double radius = 0,
   double flash = -1,
   double time = 0,
+  bool active = false,
+  bool running = false,
 }) {
   switch (kind) {
     case ObjectKind.domino:
@@ -94,7 +115,70 @@ void paintObject(
       _paintJumper(c, t, w, h, flash, time);
     case ObjectKind.target:
       _paintTarget(c, t, radius, flash, time);
+    case ObjectKind.cat:
+      _paintCharacter(c, t, w, h, active, running, time, cat: true);
+    case ObjectKind.dog:
+      _paintCharacter(c, t, w, h, active, running, time, cat: false);
+    case ObjectKind.ramp:
+      _paintRamp(c, t, w, h);
+    case ObjectKind.button:
+      _paintButton(c, t, w, h, active);
+    case ObjectKind.gate:
+      _paintGate(c, t, w, h, active);
+    case ObjectKind.plank:
+      _paintPlank(c, t, w, h);
   }
+}
+
+void _paintCharacter(Canvas c, LevelTheme t, double w, double h, bool startled, bool running, double time, {required bool cat}) {
+  final stride = running ? math.sin(time * 18) * h * 0.08 : 0.0;
+  final bodyColor = cat ? const Color(0xFFFFB45C) : const Color(0xFFB8794B);
+  c.drawOval(Rect.fromCenter(center: Offset(0, h * 0.05), width: w * 0.86, height: h * 0.62), Paint()..color = bodyColor);
+  c.drawCircle(Offset(w * 0.27, -h * 0.16), h * 0.28, Paint()..color = bodyColor);
+  if (cat) {
+    final ears = Paint()..color = bodyColor;
+    c.drawPath(Path()..moveTo(w * 0.12, -h * 0.3)..lineTo(w * 0.17, -h * 0.55)..lineTo(w * 0.3, -h * 0.31)..close(), ears);
+    c.drawPath(Path()..moveTo(w * 0.3, -h * 0.31)..lineTo(w * 0.4, -h * 0.53)..lineTo(w * 0.47, -h * 0.2)..close(), ears);
+  } else {
+    c.drawOval(Rect.fromCenter(center: Offset(w * 0.4, -h * 0.04), width: w * 0.28, height: h * 0.24), Paint()..color = bodyColor);
+  }
+  c.drawCircle(Offset(w * 0.36, -h * 0.18), h * 0.035, Paint()..color = const Color(0xFF241A17));
+  final leg = Paint()..color = const Color(0xFF49352D)..strokeWidth = h * 0.09..strokeCap = StrokeCap.round;
+  for (final x in [-w * 0.2, w * 0.18]) {
+    c.drawLine(Offset(x, h * 0.25), Offset(x + stride, h * 0.45), leg);
+  }
+  if (startled && !running) {
+    final p = Paint()..color = const Color(0xFFFFD23F)..strokeWidth = h * 0.06..strokeCap = StrokeCap.round;
+    c.drawLine(Offset(w * 0.38, -h * 0.62), Offset(w * 0.38, -h * 0.82), p);
+    c.drawCircle(Offset(w * 0.38, -h * 0.91), h * 0.025, p);
+  }
+}
+
+void _paintRamp(Canvas c, LevelTheme t, double w, double h) {
+  final path = Path()..moveTo(-w / 2, h / 2)..lineTo(w / 2, -h / 2)..lineTo(w / 2, h / 2)..close();
+  c.drawPath(path, Paint()..color = t.platform);
+  c.drawLine(Offset(-w / 2, h / 2), Offset(w / 2, -h / 2), Paint()..color = t.accent..strokeWidth = h * 0.2..strokeCap = StrokeCap.round);
+}
+
+void _paintButton(Canvas c, LevelTheme t, double w, double h, bool active) {
+  final rect = RRect.fromRectAndRadius(Rect.fromCenter(center: Offset.zero, width: w, height: h), Radius.circular(h * 0.35));
+  c.drawRRect(rect, Paint()..color = active ? const Color(0xFF43D17A) : const Color(0xFFE24A63));
+  c.drawRRect(rect.deflate(h * 0.18), Paint()..color = Colors.white.withValues(alpha: 0.7));
+}
+
+void _paintGate(Canvas c, LevelTheme t, double w, double h, bool open) {
+  final shift = open ? -h * 0.48 : 0.0;
+  final rect = Rect.fromCenter(center: Offset(0, shift), width: w, height: open ? h * 0.12 : h);
+  c.drawRRect(RRect.fromRectAndRadius(rect, Radius.circular(w * 0.16)), Paint()..color = open ? const Color(0xFF43D17A) : const Color(0xFF596273));
+  final stripe = Paint()..color = t.accent..strokeWidth = w * 0.2;
+  for (var y = rect.top + w; y < rect.bottom; y += w * 2.2) { c.drawLine(Offset(-w * 0.3, y), Offset(w * 0.3, y + w), stripe); }
+}
+
+void _paintPlank(Canvas c, LevelTheme t, double w, double h) {
+  final rect = RRect.fromRectAndRadius(Rect.fromCenter(center: Offset.zero, width: w, height: h), Radius.circular(h * 0.2));
+  c.drawRRect(rect, Paint()..color = t.box);
+  c.drawRRect(rect, Paint()..style = PaintingStyle.stroke..strokeWidth = h * 0.1..color = t.boxEdge);
+  for (var x = -w / 2 + h * 0.6; x < w / 2; x += h * 0.7) { c.drawLine(Offset(x, -h * 0.3), Offset(x, h * 0.3), Paint()..color = t.boxEdge.withValues(alpha: 0.8)..strokeWidth = h * 0.06); }
 }
 
 void _glowStroke(Canvas c, Path p, Color color, double width) {

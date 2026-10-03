@@ -227,6 +227,10 @@ class TapChainGame extends FlameGame {
         radius: spec.radius,
         flash: o.flash,
         time: _clock,
+        active: o.isCharacter
+            ? o.flash >= 0 && o.flash < 0.3
+            : o.activated || o.open,
+        running: o.running,
       );
       canvas.restore();
     }

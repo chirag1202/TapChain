@@ -1,0 +1,50 @@
+import 'dart:ui';
+import '../../level_config.dart';
+
+const _generatedTheme = LevelTheme(
+  id: ThemeId.neon,
+  name: 'Neon Night',
+  emoji: '🌃',
+  skyTop: Color(0xFF07072B),
+  skyBottom: Color(0xFF3A0CA3),
+  ground: Color(0xFF14143F),
+  groundTop: Color(0xFF00F5D4),
+  platform: Color(0xFF12123A),
+  platformEdge: Color(0xFF00F5D4),
+  domino: Color(0xFFFF2E93),
+  dominoDot: Color(0xFFFFFFFF),
+  ball: Color(0xFF00E5FF),
+  box: Color(0xFFB5179E),
+  boxEdge: Color(0xFFF72585),
+  target: Color(0xFFFFEE32),
+  accent: Color(0xFF00F5D4),
+  glow: true,
+);
+
+final levelGeneratedMechanism9 = LevelConfig(
+  id: 29,
+  name: 'Generated Mechanism 9',
+  hint: 'Use the characters and switch to open the way to the target.',
+  theme: _generatedTheme,
+  baseReward: 190,
+  generatorVersion: 1,
+  generationSeed: 2000078150,
+  generationTemplate: 'mechanism',
+  generationDifficulty: 9,
+  complexityScore: 9.6,
+  objects: [
+    ObjectSpec.domino(1.2, 14.0, h: 1.0, angle: 0.0, starter: true, push: Offset(0.35, 0.0)),
+    ObjectSpec.domino(1.76, 14.0, h: 1.0, angle: 0.0),
+    ObjectSpec.domino(2.3200000000000003, 14.0, h: 1.0, angle: 0.0),
+    ObjectSpec.domino(2.88, 14.0, h: 1.0, angle: 0.0),
+    ObjectSpec.domino(3.4400000000000004, 14.0, h: 1.0, angle: 0.0),
+    ObjectSpec.domino(4.0, 14.0, h: 1.0, angle: 0.0),
+    ObjectSpec.ball(4.55, 14.0, radius: 0.35),
+    ObjectSpec.dog(5.33, 14.0, direction: 1.0),
+    ObjectSpec.cat(6.23, 14.0, direction: 1.0),
+    ObjectSpec.button(7.08, 13.88, w: 0.55, h: 0.2, id: 'switch-a', linkedTargetId: 'gate-a'),
+    ObjectSpec.gate(7.73, 13.2, w: 0.25, h: 1.6, id: 'gate-a'),
+    ObjectSpec.ramp(0.5, 13.9, 0.8, h: 0.22, angle: -0.13),
+    ObjectSpec.target(8.45, 14.0, radius: 0.48),
+  ],
+);

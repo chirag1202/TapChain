@@ -11,7 +11,7 @@ import 'logical_puzzle.dart';
 
 const int currentGeneratorVersion = 1;
 
-enum LevelTemplate { auto, simpleRelay, drop, spring, cascade }
+enum LevelTemplate { auto, simpleRelay, drop, spring, cascade, mechanism }
 
 /// Request parameters for an offline developer-side generation run.
 class LevelGenerationRequest {
@@ -97,9 +97,9 @@ class GenerationResult {
   final Map<String, int> rejections;
 }
 
-/// Builds deterministic relay, drop, and spring candidates and vets them with
-/// the same Forge2D simulation used by gameplay. This is deliberately offline
-/// and does not touch player state or the game timer.
+/// Builds deterministic relay, drop, spring, cascade, and character-switch
+/// candidates and vets them with the same Forge2D simulation used by gameplay.
+/// This is deliberately offline and does not touch player state or the game timer.
 class LevelGenerator {
   const LevelGenerator();
 
@@ -196,6 +196,7 @@ class LevelGenerator {
           _transform(object, mirrored: mirrored, horizontalScale: scale),
       ],
       LevelTemplate.cascade => _cascadeLayout(difficulty),
+      LevelTemplate.mechanism => _mechanismLayout(difficulty),
       LevelTemplate.auto => throw StateError('Auto template was not resolved.'),
     };
     final puzzle = _logicalPuzzle(selectedTemplate);
@@ -211,6 +212,7 @@ class LevelGenerator {
         LevelTemplate.spring =>
           'Guide the ball onto the spring and upper lane.',
         LevelTemplate.cascade => 'Start midway and follow both drops to the target.',
+        LevelTemplate.mechanism => 'Use the characters and switch to open the way to the target.',
         LevelTemplate.auto => 'Follow the chain to the target.',
       },
       theme: request.theme,
@@ -290,6 +292,36 @@ class LevelGenerator {
     ];
   }
 
+  List<ObjectSpec> _mechanismLayout(int difficulty) {
+    // A grounded, deterministic character-switch-gate chain. The ball tips a
+    // relay, reaches the cat, and the cat runs over the linked switch to open
+    // the gate. Ramp and plank add physical route elements in later variants.
+    final dominoCount = 4 + (difficulty ~/ 4);
+    final ballX = 1.2 + (dominoCount - 1) * 0.56 + 0.55;
+    final dogX = ballX + 0.78;
+    final catX = dogX + 0.9;
+    final buttonX = catX + 0.85;
+    final gateX = buttonX + 0.65;
+    final objects = <ObjectSpec>[
+      ...ObjectSpec.dominoRow(
+        fromX: 1.2,
+        surfaceY: kGroundY,
+        count: dominoCount,
+        spacing: 0.56,
+        firstIsStarter: true,
+      ),
+      ObjectSpec.ball(ballX, kGroundY),
+      ObjectSpec.dog(dogX, kGroundY, direction: 1),
+      ObjectSpec.cat(catX, kGroundY, direction: 1),
+      ObjectSpec.button(buttonX, kGroundY - 0.12, id: 'switch-a', linkedTargetId: 'gate-a'),
+      ObjectSpec.gate(gateX, kGroundY - 0.8, id: 'gate-a'),
+      if (difficulty >= 4) ObjectSpec.ramp(0.5, 13.9, 0.8, angle: -0.22 + difficulty * 0.01),
+      if (difficulty <= 3) ObjectSpec.plank(7.25, kGroundY, length: 0.7),
+      ObjectSpec.target(8.45, kGroundY, radius: 0.48),
+    ];
+    return objects;
+  }
+
   ObjectSpec _transform(
     ObjectSpec object, {
     required bool mirrored,
@@ -349,6 +381,12 @@ class LevelGenerator {
         object.y + object.radius,
         radius: object.radius,
       ),
+      ObjectKind.cat => ObjectSpec.cat(x(object.x), object.y + object.h / 2, direction: mirrored ? -object.direction : object.direction),
+      ObjectKind.dog => ObjectSpec.dog(x(object.x), object.y + object.h / 2, direction: mirrored ? -object.direction : object.direction),
+      ObjectKind.ramp => ObjectSpec.ramp(x(object.x), object.y, object.w * horizontalScale, angle: angle, h: object.h),
+      ObjectKind.button => ObjectSpec.button(x(object.x), object.y, w: object.w * horizontalScale, h: object.h, id: object.id, linkedTargetId: object.linkedTargetId),
+      ObjectKind.gate => ObjectSpec.gate(x(object.x), object.y, w: object.w, h: object.h, id: object.id),
+      ObjectKind.plank => ObjectSpec.plank(x(object.x), object.y + object.h / 2, length: object.w * horizontalScale, h: object.h, angle: angle),
     };
   }
 
@@ -419,6 +457,23 @@ class LevelGenerator {
         PuzzleLink('ground-run', 'target'),
       ],
     ),
+    LevelTemplate.mechanism => const LogicalPuzzle(
+      nodes: [
+        PuzzleNode('starter', PuzzleNodeType.starter),
+        PuzzleNode('ball', PuzzleNodeType.ball),
+        PuzzleNode('character', PuzzleNodeType.dominoRun),
+        PuzzleNode('button', PuzzleNodeType.platform),
+        PuzzleNode('gate', PuzzleNodeType.platform),
+        PuzzleNode('target', PuzzleNodeType.target),
+      ],
+      links: [
+        PuzzleLink('starter', 'ball'),
+        PuzzleLink('ball', 'character'),
+        PuzzleLink('character', 'button'),
+        PuzzleLink('button', 'gate'),
+        PuzzleLink('gate', 'target'),
+      ],
+    ),
     LevelTemplate.auto => throw StateError('Auto template was not resolved.'),
   };
 
@@ -435,10 +490,18 @@ class LevelGenerator {
       LevelTemplate.drop => 2.0,
       LevelTemplate.spring => 5.0,
       LevelTemplate.cascade => 6.0,
+      LevelTemplate.mechanism =>
+        4.0 +
+        objects.where((o) => o.kind == ObjectKind.cat || o.kind == ObjectKind.dog).length * 0.6 +
+        (objects.any((o) => o.kind == ObjectKind.button) && objects.any((o) => o.kind == ObjectKind.gate) ? 1.2 : 0) +
+        (objects.any((o) => o.kind == ObjectKind.ramp) ? 0.8 : 0) +
+        (objects.any((o) => o.kind == ObjectKind.plank) ? 0.8 : 0),
       LevelTemplate.auto => 0.0,
     };
     final progression = template == LevelTemplate.cascade
         ? 3.5 + difficulty * 0.55
+        : template == LevelTemplate.mechanism
+        ? mechanicBonus + dominoes * 0.25 + difficulty * 0.1
         : 1 + (dominoes - 5) * 0.32 + mechanicBonus + difficulty * 0.06;
     return (progression)
         .clamp(1, 10)
@@ -450,6 +513,7 @@ class LevelGenerator {
     LevelTemplate.drop => 'Drop',
     LevelTemplate.spring => 'Spring',
     LevelTemplate.cascade => 'Cascade',
+    LevelTemplate.mechanism => 'Mechanism',
     LevelTemplate.auto => 'Puzzle',
   };
 
@@ -520,13 +584,15 @@ GeometryReport validateGeometry(LevelConfig level, LogicalPuzzle puzzle) {
       final relevant =
           (a.isDynamic && (b.isDynamic || b.kind == ObjectKind.target)) ||
           (b.isDynamic && a.kind == ObjectKind.target) ||
-          (a.kind == ObjectKind.platform &&
+          ((a.kind == ObjectKind.platform || a.kind == ObjectKind.ramp) &&
               (b.kind == ObjectKind.platform ||
+                  b.kind == ObjectKind.ramp ||
                   b.isDynamic ||
                   b.kind == ObjectKind.target ||
                   b.kind == ObjectKind.jumper)) ||
-          (b.kind == ObjectKind.platform &&
+          ((b.kind == ObjectKind.platform || b.kind == ObjectKind.ramp) &&
               (a.isDynamic ||
+                  a.kind == ObjectKind.ramp ||
                   a.kind == ObjectKind.target ||
                   a.kind == ObjectKind.jumper));
       if (!relevant) continue;

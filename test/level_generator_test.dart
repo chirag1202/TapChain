@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tapchain/game/level_config.dart';
+import 'package:tapchain/game/chain_simulation.dart';
 import 'package:tapchain/game/level_exporter.dart';
 import 'package:tapchain/game/level_generator.dart';
 import 'package:tapchain/game/levels/level_1.dart';
@@ -125,6 +126,7 @@ void main() {
       LevelTemplate.simpleRelay,
       LevelTemplate.drop,
       LevelTemplate.spring,
+      LevelTemplate.mechanism,
     ]) {
       final result = generator.generateLevels(
         LevelGenerationRequest(
@@ -179,6 +181,38 @@ void main() {
       previousComplexity = candidate.definition.complexityScore;
     }
     expect(previousObjects, greaterThan(10));
+  });
+
+  test('progressive mechanism batch validates character and switch chain', () {
+    final result = generator.generateLevels(
+      const LevelGenerationRequest(
+        count: 10,
+        difficulty: 1,
+        seed: 847291,
+        theme: gardenTheme,
+        template: LevelTemplate.mechanism,
+        firstLevelId: 21,
+        progressiveDifficulty: true,
+      ),
+    );
+    expect(result.candidates, hasLength(10), reason: '${result.rejections}');
+    final allKinds = result.candidates
+        .expand((candidate) => candidate.definition.level.objects)
+        .map((object) => object.kind)
+        .toSet();
+    expect(allKinds, containsAll([ObjectKind.cat, ObjectKind.dog, ObjectKind.button, ObjectKind.gate, ObjectKind.ramp, ObjectKind.plank]));
+    for (final candidate in result.candidates) {
+      expect(candidate.physics.valid, isTrue);
+      expect(candidate.physics.targetHit, isTrue);
+      expect(candidate.physics.allDynamicObjectsFell, isTrue);
+      final sim = ChainSimulation(candidate.definition.level)..trigger();
+      while (!sim.failed && sim.time < 45) {
+        sim.advance(1 / 60);
+      }
+      expect(sim.objects.where((object) => object.isButton).single.activated, isTrue);
+      expect(sim.objects.where((object) => object.isGate).single.open, isTrue);
+      expect(sim.objects.where((object) => object.isCharacter).any((object) => object.activated), isTrue);
+    }
   });
 
   test('geometry validator explains objects outside world bounds', () {

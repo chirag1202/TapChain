@@ -103,6 +103,12 @@ class LevelExporter {
       ObjectKind.target =>
         'ObjectSpec.target(${object.x}, ${object.y + object.radius}, '
             'radius: ${object.radius})',
+      ObjectKind.cat => 'ObjectSpec.cat(${object.x}, ${object.y + object.h / 2}, direction: ${object.direction})',
+      ObjectKind.dog => 'ObjectSpec.dog(${object.x}, ${object.y + object.h / 2}, direction: ${object.direction})',
+      ObjectKind.ramp => 'ObjectSpec.ramp(${object.x}, ${object.y}, ${object.w}, h: ${object.h}, angle: ${object.angle})',
+      ObjectKind.button => 'ObjectSpec.button(${object.x}, ${object.y}, w: ${object.w}, h: ${object.h}, id: ${object.id == null ? 'null' : _quote(object.id!)}, linkedTargetId: ${object.linkedTargetId == null ? 'null' : _quote(object.linkedTargetId!)})',
+      ObjectKind.gate => 'ObjectSpec.gate(${object.x}, ${object.y}, w: ${object.w}, h: ${object.h}, id: ${object.id == null ? 'null' : _quote(object.id!)})',
+      ObjectKind.plank => 'ObjectSpec.plank(${object.x}, ${object.y + object.h / 2}, length: ${object.w}, h: ${object.h}, angle: ${object.angle})',
     };
   }
 
