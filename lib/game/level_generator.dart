@@ -438,7 +438,7 @@ class LevelGenerator {
       ObjectKind.ramp => ObjectSpec.ramp(x(object.x), object.y, object.w * horizontalScale, angle: angle, h: object.h),
       ObjectKind.button => ObjectSpec.button(x(object.x), object.y, w: object.w * horizontalScale, h: object.h, id: object.id, linkedTargetId: object.linkedTargetId),
       ObjectKind.gate => ObjectSpec.gate(x(object.x), object.y, w: object.w, h: object.h, id: object.id),
-      ObjectKind.plank => ObjectSpec.plank(x(object.x), object.y + object.h / 2, length: object.w * horizontalScale, h: object.h, angle: angle),
+      ObjectKind.plank => ObjectSpec.plank(x(object.x), object.y + object.h / 2, length: object.w * horizontalScale, h: object.h, angle: angle, starter: starter, push: push),
     };
   }
 

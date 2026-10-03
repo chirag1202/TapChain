@@ -181,8 +181,24 @@ class ObjectSpec {
     : this._(kind: ObjectKind.gate, x: x, y: y, w: w, h: h, id: id);
 
   /// Dynamic plank that tips and can bridge a gap.
-  const ObjectSpec.plank(double x, double surfaceY, {double length = 2.0, double h = 0.2, double angle = 0})
-    : this._(kind: ObjectKind.plank, x: x, y: surfaceY - h / 2, w: length, h: h, angle: angle);
+  const ObjectSpec.plank(
+    double x,
+    double surfaceY, {
+    double length = 2.0,
+    double h = 0.2,
+    double angle = 0,
+    bool starter = false,
+    Offset push = Offset.zero,
+  }) : this._(
+         kind: ObjectKind.plank,
+         x: x,
+         y: surfaceY - h / 2,
+         w: length,
+         h: h,
+         angle: angle,
+         starter: starter,
+         push: push,
+       );
 
   final ObjectKind kind;
   final double x;

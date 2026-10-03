@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tapchain/game/chain_simulation.dart';
 import 'package:tapchain/game/level_config.dart';
+import 'package:tapchain/game/physics_objects.dart';
 import 'package:tapchain/game/levels/levels.dart';
 
 class Outcome {
@@ -97,61 +98,205 @@ LevelConfig withPush(LevelConfig l, double k) => LevelConfig(
 );
 
 void main() {
-  test('levels 11-20 vary mechanics, slopes, jumpers, and tap height', () {
-    final generated = allLevels.where((level) => level.id >= 11 && level.id <= 20).toList();
-    expect(
-      generated.map((level) => level.generationTemplate).toSet(),
-      containsAll(['slope', 'jumper', 'cascade', 'mechanism']),
-    );
-    expect(generated.any((level) => level.objects.any((o) => o.kind == ObjectKind.jumper)), isTrue);
-    expect(
-      generated.any((level) => level.objects.any((o) => o.kind == ObjectKind.platform && o.angle.abs() > 0.1)),
-      isTrue,
-    );
-    expect(
-      generated.map((level) => level.objects.singleWhere((o) => o.starter).kind).toSet(),
-      contains(ObjectKind.domino),
-    );
-    final starterHeights = generated
-        .map((level) => level.objects.singleWhere((o) => o.starter).y)
+  test(
+    'levels 11-20 introduce the physical mechanics in a tutorial sequence',
+    () {
+      final generated = allLevels
+          .where((level) => level.id >= 11 && level.id <= 20)
+          .toList();
+      expect(
+        generated.map((level) => level.generationTemplate).toSet(),
+        containsAll([
+          'ramp-intro',
+          'plank-intro',
+          'switch-gate-intro',
+          'cat-intro',
+          'dog-intro',
+          'switch-gate-sequence',
+          'ramp-return',
+          'cat-switch-gate',
+          'dog-cat-switch-gate',
+          'mechanics-combo',
+        ]),
+      );
+      expect(
+        generated.any(
+          (level) => level.objects.any((o) => o.kind == ObjectKind.ramp),
+        ),
+        isTrue,
+      );
+      final introducedKinds = generated
+          .expand((level) => level.objects)
+          .map((o) => o.kind)
+          .toSet();
+      expect(
+        introducedKinds,
+        containsAll([
+          ObjectKind.ramp,
+          ObjectKind.plank,
+          ObjectKind.button,
+          ObjectKind.gate,
+          ObjectKind.cat,
+          ObjectKind.dog,
+        ]),
+      );
+      expect(
+        generated
+            .map((level) => level.objects.singleWhere((o) => o.starter).kind)
+            .toSet(),
+        contains(ObjectKind.domino),
+      );
+      final starterHeights = generated
+          .map((level) => level.objects.singleWhere((o) => o.starter).y)
+          .toSet();
+      expect(starterHeights.length, greaterThan(2));
+    },
+  );
+
+  test(
+    'levels 21-30 present ten authored reasoning concepts and varied mechanics',
+    () {
+      final generated = allLevels
+          .where((level) => level.id >= 21 && level.id <= 30)
+          .toList();
+      expect(
+        generated.map((level) => level.generationTemplate).toSet(),
+        containsAll([
+          'junction-choice',
+          'reverse-entry',
+          'switchback-gate',
+          'spring-return',
+          'falling-branch',
+          'pet-relay',
+          'plank-switch',
+          'decoy-height',
+          'ramp-transfer',
+          'sequence-prediction',
+        ]),
+      );
+      final kinds = generated
+          .expand((level) => level.objects)
+          .map((o) => o.kind)
+          .toSet();
+      expect(
+        kinds,
+        containsAll([
+          ObjectKind.cat,
+          ObjectKind.dog,
+          ObjectKind.button,
+          ObjectKind.gate,
+          ObjectKind.ramp,
+          ObjectKind.plank,
+          ObjectKind.jumper,
+        ]),
+      );
+      final difficulties = generated
+          .map((level) => level.generationDifficulty!)
+          .toList();
+      expect(
+        difficulties,
+        orderedEquals(List.generate(10, (index) => index + 10)),
+      );
+    },
+  );
+
+  test('levels 11-20 have a named tutorial concept on every stage', () {
+    final concepts = allLevels
+        .where((level) => level.id >= 11 && level.id <= 20)
+        .map((level) => level.generationTemplate)
         .toSet();
-    expect(starterHeights.length, greaterThan(3));
+    expect(concepts, hasLength(10));
   });
 
-  test('levels 21-30 continue varying puzzles while exposing test objects', () {
-    final generated = allLevels.where((level) => level.id >= 21 && level.id <= 30).toList();
-    expect(
-      generated.map((level) => level.generationTemplate).toSet(),
-      containsAll(['mechanism', 'slope', 'jumper', 'cascade']),
+  test('levels 11-20 teach and activate each new mechanic in sequence', () {
+    final lessons = allLevels.where(
+      (level) => level.id >= 11 && level.id <= 20,
     );
-    final kinds = generated.expand((level) => level.objects).map((o) => o.kind).toSet();
-    expect(kinds, containsAll([
-      ObjectKind.cat,
-      ObjectKind.dog,
-      ObjectKind.button,
-      ObjectKind.gate,
-      ObjectKind.ramp,
-      ObjectKind.plank,
-      ObjectKind.jumper,
-    ]));
-    final difficulties = generated.map((level) => level.generationDifficulty!).toList();
-    expect(difficulties, orderedEquals(List.generate(10, (index) => index + 10)));
+    final contactPairs = <int, Set<String>>{};
+    final simulations = <int, ChainSimulation>{};
+    for (final level in lessons) {
+      final sim = ChainSimulation(level);
+      final pairs = <String>{};
+      sim.onImpact = (a, b, _, __) {
+        if (b != null) pairs.add('${a.name}:${b.name}');
+      };
+      sim.trigger();
+      while (!sim.failed && sim.time < 30) {
+        sim.advance(1 / 60);
+      }
+      expect(sim.targetHit, isTrue, reason: 'L${level.id}');
+      expect(
+        sim.fallenObjectCount,
+        sim.totalDynamicObjects,
+        reason: 'L${level.id}',
+      );
+      contactPairs[level.id] = pairs;
+      simulations[level.id] = sim;
+    }
+
+    PhysicsObject find(int levelId, ObjectKind kind) => simulations[levelId]!
+        .objects
+        .firstWhere((object) => object.spec.kind == kind);
+    Set<ObjectKind> kinds(int levelId) => allLevels
+        .singleWhere((level) => level.id == levelId)
+        .objects
+        .map((object) => object.kind)
+        .toSet();
+
+    expect(contactPairs[11], contains(contains(':ramp')));
+    expect(find(12, ObjectKind.plank).hasFallen, isTrue);
+    expect(kinds(12), {ObjectKind.plank, ObjectKind.target});
+    expect(find(13, ObjectKind.button).activated, isTrue);
+    expect(find(13, ObjectKind.gate).open, isTrue);
+    expect(kinds(13), isNot(contains(ObjectKind.cat)));
+    expect(kinds(13), isNot(contains(ObjectKind.dog)));
+    expect(find(14, ObjectKind.cat).activated, isTrue);
+    expect(kinds(14), isNot(contains(ObjectKind.dog)));
+    expect(kinds(14), isNot(contains(ObjectKind.gate)));
+    expect(find(15, ObjectKind.dog).activated, isTrue);
+    expect(kinds(15), isNot(contains(ObjectKind.cat)));
+    expect(kinds(15), isNot(contains(ObjectKind.button)));
+    expect(find(16, ObjectKind.button).activated, isTrue);
+    expect(find(16, ObjectKind.gate).open, isTrue);
+    expect(contactPairs[17], contains(contains(':ramp')));
+    expect(find(18, ObjectKind.cat).activated, isTrue);
+    expect(find(18, ObjectKind.gate).open, isTrue);
+    expect(find(19, ObjectKind.dog).activated, isTrue);
+    expect(find(19, ObjectKind.cat).activated, isTrue);
+    expect(find(20, ObjectKind.dog).activated, isTrue);
+    expect(find(20, ObjectKind.cat).activated, isTrue);
+    expect(find(20, ObjectKind.button).activated, isTrue);
+    expect(find(20, ObjectKind.gate).open, isTrue);
+    expect(find(20, ObjectKind.plank).hasFallen, isTrue);
   });
 
-  test('levels 12-30 raise difficulty across six varied route types', () {
-    final generated = allLevels.where((level) => level.id >= 12 && level.id <= 30).toList();
+  test('levels 31-40 use individually named late-game route concepts', () {
+    final generated = allLevels
+        .where((level) => level.id >= 31 && level.id <= 40)
+        .toList();
     expect(
       generated.map((level) => level.generationDifficulty!),
-      orderedEquals(List.generate(19, (index) => index + 1)),
+      orderedEquals(List.generate(10, (index) => index + 11)),
     );
     expect(
       generated.map((level) => level.generationTemplate).toSet(),
-      containsAll(['slope', 'jumper', 'mechanism', 'cascade', 'drop', 'spring']),
+      containsAll([
+        'forked-descent',
+        'spring-return',
+        'reverse-relay',
+        'switchback',
+        'two-tier-transfer',
+        'springboard-return',
+        'cross-lane',
+        'compact-chain',
+        'high-drop',
+        'final-cascade',
+      ]),
     );
   });
 
-  test('there are thirty levels with exactly one default starter each', () {
-    expect(allLevels.length, 30);
+  test('there are forty levels with exactly one default starter each', () {
+    expect(allLevels.length, 40);
     for (final l in allLevels) {
       expect(l.objects.where((o) => o.starter).length, 1, reason: 'L${l.id}');
     }

@@ -1,0 +1,52 @@
+import 'dart:ui';
+import '../../level_config.dart';
+
+const _generatedTheme = LevelTheme(
+  id: ThemeId.neon,
+  name: 'Neon Night',
+  emoji: '🌃',
+  skyTop: Color(0xFF07072B),
+  skyBottom: Color(0xFF3A0CA3),
+  ground: Color(0xFF14143F),
+  groundTop: Color(0xFF00F5D4),
+  platform: Color(0xFF12123A),
+  platformEdge: Color(0xFF00F5D4),
+  domino: Color(0xFFFF2E93),
+  dominoDot: Color(0xFFFFFFFF),
+  ball: Color(0xFF00E5FF),
+  box: Color(0xFFB5179E),
+  boxEdge: Color(0xFFF72585),
+  target: Color(0xFFFFEE32),
+  accent: Color(0xFF00F5D4),
+  glow: true,
+);
+
+final levelGeneratedDrop1 = LevelConfig(
+  id: 31,
+  name: 'Generated Drop 1',
+  hint: 'Follow the ball through the drop to the target.',
+  theme: _generatedTheme,
+  baseReward: 210,
+  generatorVersion: 1,
+  generationSeed: 717467558,
+  generationTemplate: 'drop',
+  generationDifficulty: 11,
+  complexityScore: 11.0,
+  objects: [
+    ObjectSpec.platform(2.8, 8.4, 5.4, h: 0.3, angle: 0.0),
+    ObjectSpec.box(0.8500000000000001, 8.4, w: 0.9, h: 0.9, starter: true, push: Offset(14.0, 0.0)),
+    ObjectSpec.domino(1.7000000000000002, 8.4, h: 1.0, angle: 0.0),
+    ObjectSpec.domino(2.3, 8.4, h: 1.0, angle: 0.0),
+    ObjectSpec.domino(2.9, 8.4, h: 1.0, angle: 0.0),
+    ObjectSpec.domino(3.5, 8.4, h: 1.0, angle: 0.0),
+    ObjectSpec.ball(4.35, 8.4, radius: 0.35),
+    ObjectSpec.platform(6.4, 11.1, 5.2, h: 0.3, angle: 0.0),
+    ObjectSpec.domino(4.7, 11.1, h: 1.0, angle: 0.0),
+    ObjectSpec.domino(5.2, 11.1, h: 1.0, angle: 0.0),
+    ObjectSpec.domino(5.7, 11.1, h: 1.0, angle: 0.0),
+    ObjectSpec.domino(6.2, 11.1, h: 1.0, angle: 0.0),
+    ObjectSpec.domino(6.7, 11.1, h: 1.0, angle: 0.0),
+    ObjectSpec.ball(7.5, 11.1, radius: 0.35),
+    ObjectSpec.target(8.5, 11.1, radius: 0.48),
+  ],
+);
