@@ -110,13 +110,13 @@ void main() {
         generated.map((level) => level.generationTemplate).toSet(),
         containsAll([
           'ramp-intro',
-          'plank-intro',
+          'upper-drop-loaded-plank',
           'switch-gate-intro',
           'cat-intro',
           'dog-intro',
-          'switch-gate-sequence',
+          'split-shelf-transfer',
           'springboard-handoff',
-          'plank-sweep-transfer',
+          'button-gate-u-route',
           'drop-pet-gate',
           'plank-switch-gate',
         ]),
@@ -165,13 +165,13 @@ void main() {
         generated.map((level) => level.generationTemplate).toSet(),
         containsAll([
           'junction-switchback-gate',
-          'reverse-entry',
-          'upper-drop-switch',
+          'two-shelf-relay-gate',
+          'false-switch-gate',
           'switch-before-spring',
-          'split-chute-handoff',
+          'branch-converge-gate',
           'crossing-pet-lanes',
-          'plank-falling-bridge',
-          'alternating-shelf-transfer',
+          'falling-bridge-timing',
+          'ramp-return-direction',
           'double-ramp-reversal',
           'gate-to-pet-relay',
         ]),
@@ -305,7 +305,6 @@ void main() {
 
     expect(contactPairs[11], contains(contains(':ramp')));
     expect(find(12, ObjectKind.plank).hasFallen, isTrue);
-    expect(kinds(12), {ObjectKind.plank, ObjectKind.target});
     expect(find(13, ObjectKind.button).activated, isTrue);
     expect(find(13, ObjectKind.gate).open, isTrue);
     expect(kinds(13), isNot(contains(ObjectKind.cat)));
@@ -316,10 +315,11 @@ void main() {
     expect(find(15, ObjectKind.dog).activated, isTrue);
     expect(kinds(15), isNot(contains(ObjectKind.cat)));
     expect(kinds(15), isNot(contains(ObjectKind.button)));
-    expect(find(16, ObjectKind.button).activated, isTrue);
-    expect(find(16, ObjectKind.gate).open, isTrue);
+    expect(find(16, ObjectKind.box).hasFallen, isTrue);
+    expect(find(16, ObjectKind.ball).hasFallen, isTrue);
     expect(find(17, ObjectKind.jumper).activated, isTrue);
-    expect(find(18, ObjectKind.plank).hasFallen, isTrue);
+    expect(find(18, ObjectKind.button).activated, isTrue);
+    expect(find(18, ObjectKind.gate).open, isTrue);
     expect(find(19, ObjectKind.dog).activated, isTrue);
     expect(find(19, ObjectKind.cat).activated, isTrue);
     expect(find(19, ObjectKind.button).activated, isTrue);

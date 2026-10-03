@@ -41,7 +41,7 @@ The optional level allowlist uses object IDs. If absent, it preserves compatibil
 | 37 | 6 | 3: plank_1, domino_1, domino_3 | 3: domino_2, domino_4, ball_1 | narrow | Plank opens switch gate; two row positions are valid. |
 | 38 | 10 | 3: box_1, domino_1, domino_5 | 7: domino_2–4, ball_1, domino_6–8 | narrow | Ramp switchback accepts upper and lower starts. |
 | 39 | 6 | 3: box_1, domino_1, domino_3 | 3: domino_2, domino_4, ball_1 | narrow | Up-across-back spring transfer. |
-| 40 | 6 | 4: domino_1–2, dog_1, cat_1 | 2: domino_3, ball_1 | broad | Finale remains a broad-choice gated sequence. |
+| 40 | 4 | 1: domino_1 | 3: domino_2–3, ball_1 | exact | Three-consequence finale requires full domino momentum to depress switch and clear gate for the dog-cat relay. |
 
 ## Engine behavior and safeguards
 

@@ -45,7 +45,7 @@ The profile labels describe the measured target-winning choices: **broad** = 4 o
 | 37 | 3/6 | 2 | narrow |
 | 38 | 3/10 | 3 | narrow |
 | 39 | 3/6 | 3 | narrow |
-| 40 | 4/6 | 4 | broad |
+| 40 | 1/4 | 1 | exact |
 
 ## Decision-quality changes
 
