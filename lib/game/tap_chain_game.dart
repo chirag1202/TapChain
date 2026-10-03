@@ -86,7 +86,7 @@ class TapChainGame extends FlameGame {
   Offset worldToScreen(Offset point) =>
       Offset(_ox + point.dx * _scale, _oy + point.dy * _scale);
 
-  /// Starts the chain only when the authored starter object is tapped.
+  /// Starts physics only when a configured player-tap candidate is tapped.
   void handleTap(Offset screenPosition) {
     if (state != GameState.waiting) return;
     final point = Vector2(

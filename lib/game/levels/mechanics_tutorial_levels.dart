@@ -9,6 +9,7 @@ const _reward = 210;
 final List<LevelConfig> mechanicTutorialLevels = [
   LevelConfig(
     id: 11,
+    tapChoiceProfile: TapChoiceProfile.narrow,
     name: 'Ramp Lesson',
     hint: 'The ramp turns a falling ball into a sideways hit.',
     theme: workshopTheme,
@@ -53,6 +54,7 @@ final List<LevelConfig> mechanicTutorialLevels = [
   ),
   LevelConfig(
     id: 13,
+    tapChoiceProfile: TapChoiceProfile.exact,
     name: 'Switch First',
     hint: 'The ball presses the switch; the open gate clears its route.',
     theme: workshopTheme,
@@ -81,6 +83,7 @@ final List<LevelConfig> mechanicTutorialLevels = [
   ),
   LevelConfig(
     id: 14,
+    tapChoiceProfile: TapChoiceProfile.narrow,
     name: 'Catapult Cat',
     hint: 'The ball wakes the cat; the cat carries the chain forward.',
     theme: neonTheme,
@@ -103,6 +106,7 @@ final List<LevelConfig> mechanicTutorialLevels = [
   ),
   LevelConfig(
     id: 15,
+    tapChoiceProfile: TapChoiceProfile.narrow,
     name: 'Dog Run',
     hint: 'Start on the right: the dog runs left through the dominoes.',
     theme: workshopTheme,
@@ -127,6 +131,7 @@ final List<LevelConfig> mechanicTutorialLevels = [
   ),
   LevelConfig(
     id: 16,
+    tapChoiceProfile: TapChoiceProfile.narrow,
     name: 'Gate Timing',
     hint: 'The switch is ahead of the barrier. Predict when the gate opens.',
     theme: neonTheme,
@@ -155,6 +160,7 @@ final List<LevelConfig> mechanicTutorialLevels = [
   ),
   LevelConfig(
     id: 17,
+    tapChoiceProfile: TapChoiceProfile.narrow,
     name: 'The Upward Handoff',
     hint: 'The upper row feeds a leftward launch from the floor spring.',
     theme: workshopTheme,
@@ -178,6 +184,7 @@ final List<LevelConfig> mechanicTutorialLevels = [
   ),
   LevelConfig(
     id: 18,
+    tapChoiceProfile: TapChoiceProfile.narrow,
     name: 'The Teeter Transfer',
     hint:
         'Tip the plank across the floor; its far end knocks the ball toward the target.',
@@ -206,6 +213,7 @@ final List<LevelConfig> mechanicTutorialLevels = [
   ),
   LevelConfig(
     id: 19,
+    tapChoiceProfile: TapChoiceProfile.broad,
     name: 'Drop Into the Relay',
     hint:
         'The high run drops the ball onto a dog, then the cat opens the low gate.',
@@ -238,6 +246,7 @@ final List<LevelConfig> mechanicTutorialLevels = [
   ),
   LevelConfig(
     id: 20,
+    tapChoiceProfile: TapChoiceProfile.narrow,
     name: 'Lever Before the Gate',
     hint:
         'The plank presses the switch first; its falling end then sends the ball through the open gate.',

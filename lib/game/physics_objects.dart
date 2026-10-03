@@ -18,6 +18,8 @@ class PhysicsObject {
   final Body body;
   bool gone = false;
   bool activated = false;
+  bool playerTapped = false;
+  bool physicsActivated = false;
   bool running = false;
   bool open = false;
   bool touched = false;

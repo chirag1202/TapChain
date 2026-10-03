@@ -4,6 +4,7 @@ import 'package:forge2d/forge2d.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tapchain/game/chain_simulation.dart';
 import 'package:tapchain/game/level_config.dart';
+import 'package:tapchain/game/level_generator.dart';
 import 'package:tapchain/game/physics_objects.dart';
 import 'package:tapchain/game/levels/levels.dart';
 
@@ -466,35 +467,66 @@ void main() {
     ];
 
     for (final level in allLevels) {
-      var fullSuccesses = 0;
-      var targetOnlySuccesses = 0;
-      final dynamics = level.objects.where((object) => object.isDynamic);
-      for (final tapped in dynamics) {
-        final sim = ChainSimulation(level);
-        expect(
-          sim.triggerAt(Vector2(tapped.x, tapped.y)),
-          isTrue,
-          reason: 'L${level.id} ${tapped.kind} tap must start physics',
-        );
-        while (!sim.failed && sim.time < 35) {
-          sim.advance(1 / 60);
-        }
-        if (sim.targetHit) {
-          targetOnlySuccesses++;
-          if (sim.allDynamicObjectsTouched) fullSuccesses++;
-        }
-      }
+      expect(level.validateTapConfiguration(), isEmpty, reason: 'L${level.id}');
+      final report = auditTapChoices(level);
       // ignore: avoid_print
       print(
-        'tap-audit L${level.id}: target=$targetOnlySuccesses '
-        'full=$fullSuccesses/${dynamics.length}',
+        'tap-audit L${level.id}: target=${report.successfulTaps} '
+        'full=${report.fullTouchSolutions}/${report.outcomes.length}',
       );
       expect(
-        fullSuccesses,
+        report.fullTouchSolutions,
         expectedFullSuccesses[level.id - 1],
         reason: 'L${level.id} full-completion tap count changed',
       );
+      expect(report.profileSatisfied, isTrue, reason: report.format());
+      if (level.id == 21) {
+        expect(report.outcomes, hasLength(7));
+        expect(report.successfulTaps, 1);
+        expect(report.failedTaps, 6);
+        expect(report.format(), contains('- junction_box (box)'));
+        expect(report.format(), contains('- upper_ball (ball)'));
+      }
     }
+  });
+
+  test('a level allowlist blocks direct taps without blocking physics', () {
+    final source = allLevels.singleWhere((item) => item.id == 21);
+    final level = LevelConfig(
+      id: source.id,
+      name: source.name,
+      hint: source.hint,
+      theme: source.theme,
+      baseReward: source.baseReward,
+      objects: source.objects,
+      tapCandidates: const {'junction_box', 'upper_ball'},
+      tapChoiceProfile: TapChoiceProfile.exact,
+    );
+    expect(level.tapCandidateIndices, hasLength(2));
+    final audit = auditTapChoices(level);
+    expect(audit.physicsOnlyObjects, hasLength(5));
+    expect(audit.successfulTaps, 1);
+
+    final domino = level.objects.firstWhere(
+      (item) => item.kind == ObjectKind.domino,
+    );
+    final sim = ChainSimulation(level);
+    expect(sim.triggerAt(Vector2(domino.x, domino.y)), isFalse);
+    expect(sim.triggered, isFalse);
+
+    final starter = level.objects.singleWhere((item) => item.starter);
+    expect(sim.triggerAt(Vector2(starter.x, starter.y)), isTrue);
+    while (!sim.failed && sim.time < 35) {
+      sim.advance(1 / 60);
+    }
+    expect(sim.targetHit, isTrue);
+    expect(sim.allDynamicObjectsTouched, isTrue);
+    expect(sim.starter.playerTapped, isTrue);
+    final physicsOnlyDomino = sim.objects.firstWhere(
+      (object) => object.spec.kind == ObjectKind.domino,
+    );
+    expect(physicsOnlyDomino.playerTapped, isFalse);
+    expect(physicsOnlyDomino.physicsActivated, isTrue);
   });
 
   test(

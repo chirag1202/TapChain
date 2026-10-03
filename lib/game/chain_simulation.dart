@@ -163,9 +163,13 @@ class ChainSimulation extends ContactListener {
     final tapped = tapPoint == null
         ? starter
         : objects
-              .where(
-                (o) => o.spec.isDynamic && !o.gone && _containsTap(o, tapPoint),
-              )
+              .where((o) {
+                final index = objects.indexOf(o);
+                return o.spec.isDynamic &&
+                    !o.gone &&
+                    config.isTapCandidate(index) &&
+                    _containsTap(o, tapPoint);
+              })
               .fold<PhysicsObject?>(null, (nearest, candidate) {
                 if (nearest == null) return candidate;
                 final candidateDistance =
@@ -179,6 +183,7 @@ class ChainSimulation extends ContactListener {
     if (tapped == null) return false;
     triggered = true;
     tapped.touched = true;
+    tapped.playerTapped = true;
     _launch(tapped);
     return true;
   }
@@ -350,17 +355,23 @@ class ChainSimulation extends ContactListener {
     if (a == null || b == null) return;
     if (a.spec.isDynamic) a.touched = true;
     if (b.spec.isDynamic) b.touched = true;
+    if (a.spec.isDynamic && b.spec.isDynamic) {
+      if (a.spec.physicsActivatable) a.physicsActivated = true;
+      if (b.spec.physicsActivatable) b.physicsActivated = true;
+    }
 
     final jumper = a.isJumper
         ? a
         : b.isJumper
         ? b
         : null;
-    if (jumper != null && !jumper.activated) {
+    if (jumper != null && jumper.spec.physicsActivatable && !jumper.activated) {
       final launched = identical(jumper, a) ? b : a;
       if (launched.spec.isDynamic) {
         _pendingJumperLaunches.add(launched);
         jumper.activated = true;
+        jumper.physicsActivated = true;
+        launched.physicsActivated = true;
         jumper.flash = 0;
       }
     }
@@ -370,10 +381,12 @@ class ChainSimulation extends ContactListener {
         : b.isButton
         ? b
         : null;
-    if (button != null && !button.activated) {
+    if (button != null && button.spec.physicsActivatable && !button.activated) {
       final other = identical(button, a) ? b : a;
       if (other.spec.isDynamic) {
         button.activated = true;
+        button.physicsActivated = true;
+        other.physicsActivated = true;
         button.flash = 0;
         final linked = button.spec.linkedTargetId;
         if (linked != null) _pendingGateIds.add(linked);
@@ -381,9 +394,14 @@ class ChainSimulation extends ContactListener {
     }
 
     for (final character in [a, b]) {
-      if (!targetHit && character.isCharacter && !character.running) {
+      if (!targetHit &&
+          character.isCharacter &&
+          character.spec.physicsActivatable &&
+          !character.running) {
         final other = identical(character, a) ? b : a;
         if (other.spec.isDynamic && other != character) {
+          character.physicsActivated = true;
+          other.physicsActivated = true;
           _pendingCharacters.add(character);
         }
       }

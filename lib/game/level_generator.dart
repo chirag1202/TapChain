@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
+import 'package:forge2d/forge2d.dart';
 
 import 'chain_simulation.dart';
 import 'level_config.dart';
@@ -70,6 +71,75 @@ class PhysicsValidationReport {
       targetHit &&
       settled &&
       allDynamicObjectsFell;
+}
+
+class TapCandidateOutcome {
+  const TapCandidateOutcome({
+    required this.objectId,
+    required this.kind,
+    required this.targetHit,
+    required this.allDynamicObjectsTouched,
+    required this.settled,
+    required this.touchedObjects,
+    required this.totalDynamicObjects,
+    required this.simulationSeconds,
+  });
+
+  final String objectId;
+  final ObjectKind kind;
+  final bool targetHit;
+  final bool allDynamicObjectsTouched;
+  final bool settled;
+  final int touchedObjects;
+  final int totalDynamicObjects;
+  final double simulationSeconds;
+}
+
+class TapChoiceAudit {
+  const TapChoiceAudit({
+    required this.levelId,
+    required this.outcomes,
+    required this.profile,
+    required this.explicitCandidates,
+    required this.physicsOnlyObjects,
+  });
+
+  final int levelId;
+  final List<TapCandidateOutcome> outcomes;
+  final TapChoiceProfile? profile;
+  final bool explicitCandidates;
+  final List<String> physicsOnlyObjects;
+
+  int get successfulTaps => outcomes.where((o) => o.targetHit).length;
+  int get fullTouchSolutions =>
+      outcomes.where((o) => o.targetHit && o.allDynamicObjectsTouched).length;
+  int get failedTaps => outcomes.length - successfulTaps;
+  bool get profileSatisfied =>
+      profile == null || profile!.accepts(successfulTaps);
+
+  String format() {
+    final winners = outcomes.where((o) => o.targetHit).toList();
+    final failures = outcomes.where((o) => !o.targetHit).toList();
+    return [
+      'Level $levelId',
+      'Tap candidates: ${outcomes.length}',
+      'Candidate policy: ${explicitCandidates ? 'explicit allowlist' : 'legacy all-dynamic'}',
+      'Successful: $successfulTaps',
+      'Failed: $failedTaps',
+      'Full-touch solutions: $fullTouchSolutions',
+      if (profile != null)
+        'Profile: ${profile!.name} (${profile!.description}) ${profileSatisfied ? 'PASS' : 'FAIL'}',
+      'Physics-only (not directly tappable): ${physicsOnlyObjects.isEmpty ? 'none' : physicsOnlyObjects.join(', ')}',
+      'SUCCESS:',
+      if (winners.isEmpty) '- none',
+      for (final outcome in winners)
+        '- ${outcome.objectId} (${outcome.kind.name})',
+      'FAIL:',
+      if (failures.isEmpty) '- none',
+      for (final outcome in failures)
+        '- ${outcome.objectId} (${outcome.kind.name})',
+    ].join('\n');
+  }
 }
 
 class GeneratedCandidate {
@@ -396,6 +466,8 @@ class LevelGenerator {
         angle: angle,
         starter: starter,
         push: push,
+        id: object.id,
+        physicsActivatable: object.physicsActivatable,
       ),
       ObjectKind.ball => ObjectSpec.ball(
         x(object.x),
@@ -403,6 +475,8 @@ class LevelGenerator {
         radius: object.radius,
         starter: starter,
         push: push,
+        id: object.id,
+        physicsActivatable: object.physicsActivatable,
       ),
       ObjectKind.box => ObjectSpec.box(
         x(object.x),
@@ -411,6 +485,8 @@ class LevelGenerator {
         h: object.h,
         starter: starter,
         push: push,
+        id: object.id,
+        physicsActivatable: object.physicsActivatable,
       ),
       ObjectKind.platform => ObjectSpec.platform(
         x(object.x + object.h / 2 * math.sin(object.angle)),
@@ -427,18 +503,19 @@ class LevelGenerator {
         direction: mirrored ? -object.direction : object.direction,
         launchVelocity: object.launchVelocity,
         launchSpeed: object.launchSpeed,
+        physicsActivatable: object.physicsActivatable,
       ),
       ObjectKind.target => ObjectSpec.target(
         x(object.x),
         object.y + object.radius,
         radius: object.radius,
       ),
-      ObjectKind.cat => ObjectSpec.cat(x(object.x), object.y + object.h / 2, direction: mirrored ? -object.direction : object.direction),
-      ObjectKind.dog => ObjectSpec.dog(x(object.x), object.y + object.h / 2, direction: mirrored ? -object.direction : object.direction),
+      ObjectKind.cat => ObjectSpec.cat(x(object.x), object.y + object.h / 2, direction: mirrored ? -object.direction : object.direction, id: object.id, physicsActivatable: object.physicsActivatable),
+      ObjectKind.dog => ObjectSpec.dog(x(object.x), object.y + object.h / 2, direction: mirrored ? -object.direction : object.direction, id: object.id, physicsActivatable: object.physicsActivatable),
       ObjectKind.ramp => ObjectSpec.ramp(x(object.x), object.y, object.w * horizontalScale, angle: angle, h: object.h),
-      ObjectKind.button => ObjectSpec.button(x(object.x), object.y, w: object.w * horizontalScale, h: object.h, id: object.id, linkedTargetId: object.linkedTargetId),
+      ObjectKind.button => ObjectSpec.button(x(object.x), object.y, w: object.w * horizontalScale, h: object.h, id: object.id, linkedTargetId: object.linkedTargetId, physicsActivatable: object.physicsActivatable),
       ObjectKind.gate => ObjectSpec.gate(x(object.x), object.y, w: object.w, h: object.h, id: object.id),
-      ObjectKind.plank => ObjectSpec.plank(x(object.x), object.y + object.h / 2, length: object.w * horizontalScale, h: object.h, angle: angle, starter: starter, push: push),
+      ObjectKind.plank => ObjectSpec.plank(x(object.x), object.y + object.h / 2, length: object.w * horizontalScale, h: object.h, angle: angle, starter: starter, push: push, id: object.id, physicsActivatable: object.physicsActivatable),
     };
   }
 
@@ -610,6 +687,7 @@ class LevelGenerator {
 /// spending time in the physics world.
 GeometryReport validateGeometry(LevelConfig level, LogicalPuzzle puzzle) {
   final errors = <String>[...puzzle.validate()];
+  errors.addAll(level.validateTapConfiguration());
   final starters = level.objects.where((object) => object.starter).length;
   final targets = level.objects
       .where((object) => object.kind == ObjectKind.target)
@@ -711,6 +789,47 @@ GeometryReport validateGeometry(LevelConfig level, LogicalPuzzle puzzle) {
     }
   }
   return GeometryReport(List.unmodifiable(errors));
+}
+
+/// Audits each configured tap in a fresh production physics world. This
+/// developer/test utility is never called during gameplay.
+TapChoiceAudit auditTapChoices(LevelConfig level, {double maxSimulationSeconds = 45}) {
+  final configErrors = level.validateTapConfiguration();
+  if (configErrors.isNotEmpty) {
+    throw ArgumentError('Invalid tap configuration: ${configErrors.join(' ')}');
+  }
+  final outcomes = <TapCandidateOutcome>[];
+  for (final index in level.tapCandidateIndices) {
+    final spec = level.objects[index];
+    final sim = ChainSimulation(level);
+    if (!sim.triggerAt(Vector2(spec.x, spec.y))) {
+      throw StateError('Tap candidate ${level.objectIdAt(index)} was not hit.');
+    }
+    while (!sim.failed && sim.time < maxSimulationSeconds) {
+      sim.advance(1 / 60);
+    }
+    outcomes.add(TapCandidateOutcome(
+      objectId: level.objectIdAt(index),
+      kind: spec.kind,
+      targetHit: sim.targetHit,
+      allDynamicObjectsTouched: sim.allDynamicObjectsTouched,
+      settled: sim.failed,
+      touchedObjects: sim.touchedObjectCount,
+      totalDynamicObjects: sim.totalDynamicObjects,
+      simulationSeconds: sim.time,
+    ));
+  }
+  return TapChoiceAudit(
+    levelId: level.id,
+    outcomes: List.unmodifiable(outcomes),
+    profile: level.tapChoiceProfile,
+    explicitCandidates: level.tapCandidates != null,
+    physicsOnlyObjects: List.unmodifiable([
+      for (var i = 0; i < level.objects.length; i++)
+        if (level.objects[i].isDynamic && !level.isTapCandidate(i))
+          level.objectIdAt(i),
+    ]),
+  );
 }
 
 /// Runs the candidate in the production Forge2D world, tapping its authored

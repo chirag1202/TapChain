@@ -20,6 +20,24 @@ enum ObjectKind {
   plank,
 }
 
+/// Expected number of target-reaching direct taps. This is validation metadata;
+/// it never changes simulation or tap eligibility.
+enum TapChoiceProfile { broad, narrow, exact }
+
+extension TapChoiceProfileRules on TapChoiceProfile {
+  bool accepts(int successfulChoices) => switch (this) {
+    TapChoiceProfile.broad => successfulChoices >= 4,
+    TapChoiceProfile.narrow => successfulChoices >= 2 && successfulChoices <= 3,
+    TapChoiceProfile.exact => successfulChoices == 1,
+  };
+
+  String get description => switch (this) {
+    TapChoiceProfile.broad => '4 or more successful taps',
+    TapChoiceProfile.narrow => '2–3 successful taps',
+    TapChoiceProfile.exact => 'exactly 1 successful tap',
+  };
+}
+
 enum ThemeId { garden, workshop, construction, neon, space, ocean, volcano }
 
 class LevelTheme {
@@ -73,6 +91,7 @@ class ObjectSpec {
     this.angle = 0,
     this.starter = false,
     this.push = Offset.zero,
+    this.physicsActivatable = false,
     this.direction = 1,
     this.launchVelocity = -15,
     this.launchSpeed = 1.7,
@@ -88,6 +107,8 @@ class ObjectSpec {
     double angle = 0,
     bool starter = false,
     Offset push = Offset.zero,
+    String? id,
+    bool physicsActivatable = true,
   }) : this._(
          kind: ObjectKind.domino,
          x: x,
@@ -97,6 +118,8 @@ class ObjectSpec {
          angle: angle,
          starter: starter,
          push: push,
+         physicsActivatable: physicsActivatable,
+         id: id,
        );
 
   /// Ball resting on a surface at [surfaceY].
@@ -106,6 +129,8 @@ class ObjectSpec {
     double radius = 0.35,
     bool starter = false,
     Offset push = Offset.zero,
+    String? id,
+    bool physicsActivatable = true,
   }) : this._(
          kind: ObjectKind.ball,
          x: x,
@@ -113,6 +138,8 @@ class ObjectSpec {
          radius: radius,
          starter: starter,
          push: push,
+         physicsActivatable: physicsActivatable,
+         id: id,
        );
 
   /// Box resting on a surface at [surfaceY].
@@ -123,6 +150,8 @@ class ObjectSpec {
     double h = 0.9,
     bool starter = false,
     Offset push = Offset.zero,
+    String? id,
+    bool physicsActivatable = true,
   }) : this._(
          kind: ObjectKind.box,
          x: x,
@@ -131,6 +160,8 @@ class ObjectSpec {
          h: h,
          starter: starter,
          push: push,
+         physicsActivatable: physicsActivatable,
+         id: id,
        );
 
   /// Static platform; (x, y) is the midpoint of the top surface.
@@ -169,6 +200,7 @@ class ObjectSpec {
     double direction = 1,
     double launchVelocity = -15,
     double launchSpeed = 1.7,
+    bool physicsActivatable = true,
   }) : this._(
          kind: ObjectKind.jumper,
          x: x,
@@ -178,28 +210,43 @@ class ObjectSpec {
          direction: direction,
          launchVelocity: launchVelocity,
          launchSpeed: launchSpeed,
+         physicsActivatable: physicsActivatable,
        );
 
   /// A character rests on [surfaceY] and runs after a physics hit.
-  const ObjectSpec.cat(double x, double surfaceY, {double direction = 1})
-    : this._(
-        kind: ObjectKind.cat,
-        x: x,
-        y: surfaceY - 0.3,
-        w: 0.72,
-        h: 0.6,
-        direction: direction,
-      );
+  const ObjectSpec.cat(
+    double x,
+    double surfaceY, {
+    double direction = 1,
+    String? id,
+    bool physicsActivatable = true,
+  }) : this._(
+         kind: ObjectKind.cat,
+         x: x,
+         y: surfaceY - 0.3,
+         w: 0.72,
+         h: 0.6,
+         direction: direction,
+         physicsActivatable: physicsActivatable,
+         id: id,
+       );
 
-  const ObjectSpec.dog(double x, double surfaceY, {double direction = 1})
-    : this._(
-        kind: ObjectKind.dog,
-        x: x,
-        y: surfaceY - 0.34,
-        w: 0.82,
-        h: 0.68,
-        direction: direction,
-      );
+  const ObjectSpec.dog(
+    double x,
+    double surfaceY, {
+    double direction = 1,
+    String? id,
+    bool physicsActivatable = true,
+  }) : this._(
+         kind: ObjectKind.dog,
+         x: x,
+         y: surfaceY - 0.34,
+         w: 0.82,
+         h: 0.68,
+         direction: direction,
+         physicsActivatable: physicsActivatable,
+         id: id,
+       );
 
   /// Static angled physical surface. Positive angles slope down to the right.
   factory ObjectSpec.ramp(
@@ -225,6 +272,7 @@ class ObjectSpec {
     double h = 0.2,
     String? id,
     String? linkedTargetId,
+    bool physicsActivatable = true,
   }) : this._(
          kind: ObjectKind.button,
          x: x,
@@ -233,6 +281,7 @@ class ObjectSpec {
          h: h,
          id: id,
          linkedTargetId: linkedTargetId,
+         physicsActivatable: physicsActivatable,
        );
 
   /// Static collision barrier; linked buttons deactivate it when pressed.
@@ -253,6 +302,8 @@ class ObjectSpec {
     double angle = 0,
     bool starter = false,
     Offset push = Offset.zero,
+    String? id,
+    bool physicsActivatable = true,
   }) : this._(
          kind: ObjectKind.plank,
          x: x,
@@ -262,6 +313,8 @@ class ObjectSpec {
          angle: angle,
          starter: starter,
          push: push,
+         physicsActivatable: physicsActivatable,
+         id: id,
        );
 
   final ObjectKind kind;
@@ -277,6 +330,10 @@ class ObjectSpec {
 
   /// Authored launch impulse used for this level's default starter.
   final Offset push;
+
+  /// Enables contact-driven actions such as springs, switches, and pet starts.
+  /// Ordinary Forge2D collision response remains active regardless.
+  final bool physicsActivatable;
   final double direction;
   final double launchVelocity;
   final double launchSpeed;
@@ -301,6 +358,7 @@ class ObjectSpec {
     angle: angle,
     starter: starter,
     push: push * k,
+    physicsActivatable: physicsActivatable,
     direction: direction,
     launchVelocity: launchVelocity,
     launchSpeed: launchSpeed,
@@ -317,6 +375,7 @@ class ObjectSpec {
     double h = 1.0,
     bool firstIsStarter = false,
     Offset push = const Offset(0.35, 0),
+    String? idPrefix,
   }) {
     return [
       for (var i = 0; i < count; i++)
@@ -326,6 +385,7 @@ class ObjectSpec {
           h: h,
           starter: firstIsStarter && i == 0,
           push: firstIsStarter && i == 0 ? push : Offset.zero,
+          id: idPrefix == null ? null : '$idPrefix${i + 1}',
         ),
     ];
   }
@@ -344,6 +404,8 @@ class LevelConfig {
     this.generationTemplate,
     this.generationDifficulty,
     this.complexityScore,
+    this.tapCandidates,
+    this.tapChoiceProfile,
   });
 
   final int id;
@@ -359,4 +421,81 @@ class LevelConfig {
   final String? generationTemplate;
   final int? generationDifficulty;
   final double? complexityScore;
+
+  /// Optional object IDs a player may tap directly. Null retains the original
+  /// behavior for existing levels: every dynamic object is tappable. Physics
+  /// contacts are independent of this allowlist.
+  final Set<String>? tapCandidates;
+
+  /// Optional design target checked by developer-side tap audits only.
+  final TapChoiceProfile? tapChoiceProfile;
+
+  String objectIdAt(int index) {
+    final object = objects[index];
+    if (object.id != null) return object.id!;
+    final sameKindBefore = objects
+        .take(index)
+        .where((candidate) => candidate.kind == object.kind)
+        .length;
+    return '${object.kind.name}_${sameKindBefore + 1}';
+  }
+
+  List<int> get tapCandidateIndices => [
+    for (var index = 0; index < objects.length; index++)
+      if (objects[index].isDynamic &&
+          (tapCandidates == null || tapCandidates!.contains(objectIdAt(index))))
+        index,
+  ];
+
+  bool isTapCandidate(int objectIndex) {
+    if (objectIndex < 0 || objectIndex >= objects.length) return false;
+    final object = objects[objectIndex];
+    return object.isDynamic &&
+        (tapCandidates == null ||
+            tapCandidates!.contains(objectIdAt(objectIndex)));
+  }
+
+  List<String> validateTapConfiguration() {
+    if (tapCandidates == null) {
+      if (tapChoiceProfile == TapChoiceProfile.exact &&
+          tapCandidateIndices.length < 2) {
+        return const [
+          'An exact-choice profile needs at least two tap candidates.',
+        ];
+      }
+      return const [];
+    }
+    final errors = <String>[];
+    final knownIds = <String>{};
+    for (var index = 0; index < objects.length; index++) {
+      final id = objectIdAt(index);
+      if (!knownIds.add(id)) errors.add('Duplicate object id "$id".');
+    }
+    for (final id in tapCandidates!) {
+      int? index;
+      for (var i = 0; i < objects.length; i++) {
+        if (objectIdAt(i) == id) {
+          index = i;
+          break;
+        }
+      }
+      if (index == null) {
+        errors.add('Tap candidate "$id" does not exist.');
+      } else if (!objects[index].isDynamic) {
+        errors.add('Tap candidate "$id" is not dynamic.');
+      }
+    }
+    if (tapCandidates!.isEmpty) {
+      errors.add('At least one tap candidate is required.');
+    }
+    final starterIndex = objects.indexWhere((object) => object.starter);
+    if (starterIndex >= 0 && !isTapCandidate(starterIndex)) {
+      errors.add('The authored starter must also be a tap candidate.');
+    }
+    if (tapChoiceProfile == TapChoiceProfile.exact &&
+        tapCandidateIndices.length < 2) {
+      errors.add('An exact-choice profile needs at least two tap candidates.');
+    }
+    return List.unmodifiable(errors);
+  }
 }

@@ -58,8 +58,18 @@ class LevelExporter {
       ..writeln('  generationSeed: ${generated.seed},')
       ..writeln('  generationTemplate: ${_quote(generated.template)},')
       ..writeln('  generationDifficulty: ${generated.difficulty},')
-      ..writeln('  complexityScore: ${generated.complexityScore},')
-      ..writeln('  objects: [');
+      ..writeln('  complexityScore: ${generated.complexityScore},');
+    if (level.tapCandidates != null) {
+      output.writeln(
+        '  tapCandidates: const {${level.tapCandidates!.map(_quote).join(', ')}},',
+      );
+    }
+    if (level.tapChoiceProfile != null) {
+      output.writeln(
+        '  tapChoiceProfile: TapChoiceProfile.${level.tapChoiceProfile!.name},',
+      );
+    }
+    output.writeln('  objects: [');
     for (final object in level.objects) {
       output.writeln('    ${_object(object)},');
     }
@@ -79,19 +89,22 @@ class LevelExporter {
 
   String _object(ObjectSpec object) {
     final starter = object.starter ? ', starter: true' : '';
+    final id = object.id == null ? '' : ', id: ${_quote(object.id!)}';
+    final physicsActivation =
+        ', physicsActivatable: ${object.physicsActivatable}';
     final push = object.push == Offset.zero
         ? ''
         : ', push: Offset(${object.push.dx}, ${object.push.dy})';
     return switch (object.kind) {
       ObjectKind.domino =>
         'ObjectSpec.domino(${object.x}, ${object.y + object.h / 2}, '
-            'h: ${object.h}, angle: ${object.angle}$starter$push)',
+            'h: ${object.h}, angle: ${object.angle}$starter$push$id$physicsActivation)',
       ObjectKind.ball =>
         'ObjectSpec.ball(${object.x}, ${object.y + object.radius}, '
-            'radius: ${object.radius}$starter$push)',
+            'radius: ${object.radius}$starter$push$id$physicsActivation)',
       ObjectKind.box =>
         'ObjectSpec.box(${object.x}, ${object.y + object.h / 2}, '
-            'w: ${object.w}, h: ${object.h}$starter$push)',
+            'w: ${object.w}, h: ${object.h}$starter$push$id$physicsActivation)',
       ObjectKind.platform =>
         'ObjectSpec.platform('
             '${object.x + object.h / 2 * _sin(object.angle)}, '
@@ -100,16 +113,22 @@ class LevelExporter {
       ObjectKind.jumper =>
         'ObjectSpec.jumper(${object.x}, ${object.y + object.h / 2}, '
             'w: ${object.w}, h: ${object.h}, direction: ${object.direction}, '
-            'launchVelocity: ${object.launchVelocity}, launchSpeed: ${object.launchSpeed})',
+            'launchVelocity: ${object.launchVelocity}, launchSpeed: ${object.launchSpeed}, physicsActivatable: ${object.physicsActivatable})',
       ObjectKind.target =>
         'ObjectSpec.target(${object.x}, ${object.y + object.radius}, '
             'radius: ${object.radius})',
-      ObjectKind.cat => 'ObjectSpec.cat(${object.x}, ${object.y + object.h / 2}, direction: ${object.direction})',
-      ObjectKind.dog => 'ObjectSpec.dog(${object.x}, ${object.y + object.h / 2}, direction: ${object.direction})',
-      ObjectKind.ramp => 'ObjectSpec.ramp(${object.x}, ${object.y}, ${object.w}, h: ${object.h}, angle: ${object.angle})',
-      ObjectKind.button => 'ObjectSpec.button(${object.x}, ${object.y}, w: ${object.w}, h: ${object.h}, id: ${object.id == null ? 'null' : _quote(object.id!)}, linkedTargetId: ${object.linkedTargetId == null ? 'null' : _quote(object.linkedTargetId!)})',
-      ObjectKind.gate => 'ObjectSpec.gate(${object.x}, ${object.y}, w: ${object.w}, h: ${object.h}, id: ${object.id == null ? 'null' : _quote(object.id!)})',
-      ObjectKind.plank => 'ObjectSpec.plank(${object.x}, ${object.y + object.h / 2}, length: ${object.w}, h: ${object.h}, angle: ${object.angle}$starter$push)',
+      ObjectKind.cat =>
+        'ObjectSpec.cat(${object.x}, ${object.y + object.h / 2}, direction: ${object.direction}$id$physicsActivation)',
+      ObjectKind.dog =>
+        'ObjectSpec.dog(${object.x}, ${object.y + object.h / 2}, direction: ${object.direction}$id$physicsActivation)',
+      ObjectKind.ramp =>
+        'ObjectSpec.ramp(${object.x}, ${object.y}, ${object.w}, h: ${object.h}, angle: ${object.angle})',
+      ObjectKind.button =>
+        'ObjectSpec.button(${object.x}, ${object.y}, w: ${object.w}, h: ${object.h}, id: ${object.id == null ? 'null' : _quote(object.id!)}, linkedTargetId: ${object.linkedTargetId == null ? 'null' : _quote(object.linkedTargetId!)}, physicsActivatable: ${object.physicsActivatable})',
+      ObjectKind.gate =>
+        'ObjectSpec.gate(${object.x}, ${object.y}, w: ${object.w}, h: ${object.h}, id: ${object.id == null ? 'null' : _quote(object.id!)})',
+      ObjectKind.plank =>
+        'ObjectSpec.plank(${object.x}, ${object.y + object.h / 2}, length: ${object.w}, h: ${object.h}, angle: ${object.angle}$starter$push$id$physicsActivation)',
     };
   }
 

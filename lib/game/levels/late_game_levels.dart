@@ -13,6 +13,7 @@ const _reward = 620;
 final List<LevelConfig> lateGameLevels = [
   LevelConfig(
     id: 31,
+    tapChoiceProfile: TapChoiceProfile.narrow,
     name: 'Switch at the Bend',
     hint:
         'The switch is before the gate. Start midway to send the ball through it.',
@@ -23,15 +24,26 @@ final List<LevelConfig> lateGameLevels = [
     complexityScore: 11,
     objects: [
       ObjectSpec.box(1.0, kGroundY, starter: true, push: const Offset(14, 0)),
-      ...ObjectSpec.dominoRow(fromX: 1.7, surfaceY: kGroundY, count: 4, spacing: 0.56),
+      ...ObjectSpec.dominoRow(
+        fromX: 1.7,
+        surfaceY: kGroundY,
+        count: 4,
+        spacing: 0.56,
+      ),
       ObjectSpec.ball(4.5, kGroundY),
-      ObjectSpec.button(5.05, kGroundY - 0.12, id: 's31', linkedTargetId: 'g31'),
+      ObjectSpec.button(
+        5.05,
+        kGroundY - 0.12,
+        id: 's31',
+        linkedTargetId: 'g31',
+      ),
       ObjectSpec.gate(5.9, kGroundY - 0.8, id: 'g31'),
       ObjectSpec.target(7.4, kGroundY, radius: 0.48),
     ],
   ),
   LevelConfig(
     id: 32,
+    tapChoiceProfile: TapChoiceProfile.narrow,
     name: 'The Return Lane',
     hint:
         'Start on the upper right; the ball must cross the lower lane back to the target.',
@@ -57,6 +69,7 @@ final List<LevelConfig> lateGameLevels = [
   ),
   LevelConfig(
     id: 33,
+    tapChoiceProfile: TapChoiceProfile.narrow,
     name: 'Spring to the Left Target',
     hint:
         'The upper row feeds a leftward launch; the ball must land on the floor target.',
@@ -81,6 +94,7 @@ final List<LevelConfig> lateGameLevels = [
   ),
   LevelConfig(
     id: 34,
+    tapChoiceProfile: TapChoiceProfile.broad,
     name: 'Counterflow Pet Relay',
     hint:
         'Start on the right: the dog wakes the cat, which presses the linked gate switch.',
@@ -117,6 +131,7 @@ final List<LevelConfig> lateGameLevels = [
   ),
   LevelConfig(
     id: 35,
+    tapChoiceProfile: TapChoiceProfile.exact,
     name: 'Plank After the Drop',
     hint:
         'Topple the high row so the ball lands on the plank, not straight into the gap.',
@@ -143,6 +158,7 @@ final List<LevelConfig> lateGameLevels = [
   ),
   LevelConfig(
     id: 36,
+    tapChoiceProfile: TapChoiceProfile.narrow,
     name: 'Ramp Choice',
     hint:
         'The ramp sends the ball down to the left-hand chain; tapping the right row sends it away from the target.',
@@ -164,6 +180,7 @@ final List<LevelConfig> lateGameLevels = [
   ),
   LevelConfig(
     id: 37,
+    tapChoiceProfile: TapChoiceProfile.narrow,
     name: 'Open Before Impact',
     hint:
         'Tap the plank to press the switch; the row cannot pass the gate until it opens.',
@@ -199,6 +216,7 @@ final List<LevelConfig> lateGameLevels = [
   ),
   LevelConfig(
     id: 38,
+    tapChoiceProfile: TapChoiceProfile.narrow,
     name: 'Ramp Switchback',
     hint:
         'Start on the raised right lane; the ramp redirects the fall into the lower domino run.',
@@ -229,6 +247,7 @@ final List<LevelConfig> lateGameLevels = [
   ),
   LevelConfig(
     id: 39,
+    tapChoiceProfile: TapChoiceProfile.narrow,
     name: 'Up, Across, Back',
     hint:
         'The ball lands on the spring and must ride the launch arc back to the target.',
@@ -253,6 +272,7 @@ final List<LevelConfig> lateGameLevels = [
   ),
   LevelConfig(
     id: 40,
+    tapChoiceProfile: TapChoiceProfile.broad,
     name: 'One Tap, Three Consequences',
     hint:
         'Predict the order: the ball presses the switch, clears the gate, then reaches the target.',

@@ -9,6 +9,16 @@ import 'level_7.dart' show volcanoTheme;
 final List<LevelConfig> reasoningPuzzleLevels = [
   LevelConfig(
     id: 21,
+    tapChoiceProfile: TapChoiceProfile.exact,
+    tapCandidates: const {
+      'junction_box',
+      'upper_ball',
+      'shelf_domino_1',
+      'shelf_domino_2',
+      'shelf_domino_3',
+      'shelf_domino_4',
+      'return_ball',
+    },
     name: 'Junction Switchback',
     hint:
         'The box must send the upper ball through the switch before the shelf transfers reach the gate.',
@@ -19,16 +29,23 @@ final List<LevelConfig> reasoningPuzzleLevels = [
     complexityScore: 10,
     objects: [
       ObjectSpec.platform(4.0, 8.2, 6.0),
-      ObjectSpec.box(4.3, 8.2, starter: true, push: const Offset(12, 0)),
-      ObjectSpec.ball(5.7, 8.2),
+      ObjectSpec.box(
+        4.3,
+        8.2,
+        starter: true,
+        push: const Offset(12, 0),
+        id: 'junction_box',
+      ),
+      ObjectSpec.ball(5.7, 8.2, id: 'upper_ball'),
       ObjectSpec.platform(5.8, 11.0, 4.5),
       ...ObjectSpec.dominoRow(
         fromX: 7.5,
         surfaceY: 11.0,
         count: 4,
         spacing: -0.58,
+        idPrefix: 'shelf_domino_',
       ),
-      ObjectSpec.ball(5.3, 11.0),
+      ObjectSpec.ball(5.3, 11.0, id: 'return_ball'),
       ObjectSpec.button(6.55, 8.08, id: 's21', linkedTargetId: 'g21'),
       ObjectSpec.gate(1.65, kGroundY - 0.8, id: 'g21'),
       ObjectSpec.target(0.6, kGroundY),
@@ -36,6 +53,7 @@ final List<LevelConfig> reasoningPuzzleLevels = [
   ),
   LevelConfig(
     id: 22,
+    tapChoiceProfile: TapChoiceProfile.broad,
     name: 'Two Drops, One Door',
     hint:
         'Trace both right-to-left runs and the two falling handoffs before choosing a tap.',
@@ -67,6 +85,7 @@ final List<LevelConfig> reasoningPuzzleLevels = [
   ),
   LevelConfig(
     id: 23,
+    tapChoiceProfile: TapChoiceProfile.narrow,
     name: 'Switch Under the Shelf',
     hint:
         'The upper ball falls to the lower switch; the gate only protects the last lane.',
@@ -93,6 +112,7 @@ final List<LevelConfig> reasoningPuzzleLevels = [
   ),
   LevelConfig(
     id: 24,
+    tapChoiceProfile: TapChoiceProfile.narrow,
     name: 'Open the Spring Lane',
     hint:
         'The box opens the gate before the ball can reach the spring; tapping the ball skips that step.',
@@ -118,6 +138,7 @@ final List<LevelConfig> reasoningPuzzleLevels = [
   ),
   LevelConfig(
     id: 25,
+    tapChoiceProfile: TapChoiceProfile.broad,
     name: 'The Split Chute',
     hint:
         'One falling ball starts the lower cross-run; the second ball takes the last drop.',
@@ -149,6 +170,7 @@ final List<LevelConfig> reasoningPuzzleLevels = [
   ),
   LevelConfig(
     id: 26,
+    tapChoiceProfile: TapChoiceProfile.narrow,
     name: 'Opposite Pet Lanes',
     hint:
         'The falling ball starts both pets at opposite ends; predict which one reaches the switch first.',
@@ -181,6 +203,7 @@ final List<LevelConfig> reasoningPuzzleLevels = [
   ),
   LevelConfig(
     id: 27,
+    tapChoiceProfile: TapChoiceProfile.broad,
     name: 'The Falling Bridge',
     hint:
         'The plank drops across the lower domino lane; its far end sends the ball to the target.',
@@ -212,6 +235,7 @@ final List<LevelConfig> reasoningPuzzleLevels = [
   ),
   LevelConfig(
     id: 28,
+    tapChoiceProfile: TapChoiceProfile.broad,
     name: 'Alternating Shelves',
     hint:
         'The upper run moves right; its drop starts a leftward run on the lower shelf.',
@@ -243,6 +267,7 @@ final List<LevelConfig> reasoningPuzzleLevels = [
   ),
   LevelConfig(
     id: 29,
+    tapChoiceProfile: TapChoiceProfile.narrow,
     name: 'The Ramp Reversal',
     hint:
         'The right-hand ramp turns the falling ball back across the lower shelf.',
@@ -274,6 +299,7 @@ final List<LevelConfig> reasoningPuzzleLevels = [
   ),
   LevelConfig(
     id: 30,
+    tapChoiceProfile: TapChoiceProfile.narrow,
     name: 'Gate-to-Pet Finish',
     hint:
         'The domino run opens the gate; the ball then starts the dog and cat relay to the target.',
