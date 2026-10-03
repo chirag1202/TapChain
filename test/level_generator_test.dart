@@ -75,7 +75,7 @@ void main() {
     expect(hard.candidates, hasLength(1));
     expect(easy.candidates.single.definition.template, 'simpleRelay');
     expect(medium.candidates.single.definition.template, 'drop');
-    expect(hard.candidates.single.definition.template, 'spring');
+    expect(hard.candidates.single.definition.template, 'cascade');
     expect(
       hard.candidates.single.definition.level.objects.length,
       greaterThan(easy.candidates.single.definition.level.objects.length),
@@ -147,14 +147,14 @@ void main() {
     }
   });
 
-  test('progressive spring batch increases from difficulty 1 through 10', () {
+  test('progressive cascade batch increases from difficulty 1 through 10', () {
     final result = generator.generateLevels(
       const LevelGenerationRequest(
         count: 10,
         difficulty: 1,
         seed: 123456,
         theme: gardenTheme,
-        template: LevelTemplate.spring,
+        template: LevelTemplate.cascade,
         firstLevelId: 11,
         progressiveDifficulty: true,
       ),

@@ -25,7 +25,7 @@ const _themeName = String.fromEnvironment(
 );
 const _templateName = String.fromEnvironment(
   'TAPCHAIN_TEMPLATE',
-  defaultValue: 'spring',
+  defaultValue: 'cascade',
 );
 const _progressiveDifficulty = bool.fromEnvironment(
   'TAPCHAIN_PROGRESSIVE',
@@ -61,7 +61,7 @@ void main() {
     );
     if (template.isEmpty) {
       fail(
-        'Unknown TAPCHAIN_TEMPLATE "$_templateName". Use auto, simpleRelay, drop, or spring.',
+        'Unknown TAPCHAIN_TEMPLATE "$_templateName". Use auto, simpleRelay, drop, spring, or cascade.',
       );
     }
 

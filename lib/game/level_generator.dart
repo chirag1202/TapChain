@@ -6,11 +6,12 @@ import 'chain_simulation.dart';
 import 'level_config.dart';
 import 'levels/level_3.dart' as drop_template;
 import 'levels/level_9.dart' as spring_template;
+import 'levels/level_6.dart' as cascade_template;
 import 'logical_puzzle.dart';
 
 const int currentGeneratorVersion = 1;
 
-enum LevelTemplate { auto, simpleRelay, drop, spring }
+enum LevelTemplate { auto, simpleRelay, drop, spring, cascade }
 
 /// Request parameters for an offline developer-side generation run.
 class LevelGenerationRequest {
@@ -177,7 +178,9 @@ class LevelGenerator {
               ? LevelTemplate.simpleRelay
               : difficulty <= 5
               ? LevelTemplate.drop
-              : LevelTemplate.spring
+              : difficulty <= 6
+              ? LevelTemplate.spring
+              : LevelTemplate.cascade
         : request.template;
     final mirrored = random.nextBool();
     final compact = random.nextBool();
@@ -192,6 +195,7 @@ class LevelGenerator {
         for (final object in _springLayout(difficulty))
           _transform(object, mirrored: mirrored, horizontalScale: scale),
       ],
+      LevelTemplate.cascade => _cascadeLayout(difficulty),
       LevelTemplate.auto => throw StateError('Auto template was not resolved.'),
     };
     final puzzle = _logicalPuzzle(selectedTemplate);
@@ -206,6 +210,7 @@ class LevelGenerator {
         LevelTemplate.drop => 'Follow the ball through the drop to the target.',
         LevelTemplate.spring =>
           'Guide the ball onto the spring and upper lane.',
+        LevelTemplate.cascade => 'Start midway and follow both drops to the target.',
         LevelTemplate.auto => 'Follow the chain to the target.',
       },
       theme: request.theme,
@@ -252,36 +257,37 @@ class LevelGenerator {
   }
 
   List<ObjectSpec> _springLayout(int difficulty) {
-    // Preserve level 9's tested spring launch and upper lane. Increase the
-    // domino run feeding the spring from five to nine objects as difficulty
-    // rises, moving the ball toward the pad while keeping the launch route.
-    const lowerSurface = 9.3;
-    const lowerStartX = 1.45;
-    const lowerSpacing = 0.45;
-    final lowerCount = 5 + ((difficulty - 1) * 4 / 9).round();
-    final ballX = lowerStartX + (lowerCount - 1) * lowerSpacing + 0.6;
-    const platformLeft = 0.1;
-    final platformRight = ballX + 0.35;
-    final objects = <ObjectSpec>[
-      for (final object in spring_template.level9.objects)
-        if (!(object.kind == ObjectKind.platform && object.y > 9) &&
-            !(object.kind == ObjectKind.domino && object.y > 8) &&
-            object.kind != ObjectKind.ball)
+    // Keep the authored spring route intact; the previous widened feed lane
+    // caused the last domino to stall before the spring. Difficulty variation
+    // for this template comes from the seeded mirror/compression transforms.
+    return List<ObjectSpec>.of(spring_template.level9.objects);
+  }
+
+  List<ObjectSpec> _cascadeLayout(int difficulty) {
+    // Level 6 is a physics-tested two-drop chain. Grow its connected ground
+    // relay for the first six steps, then extend the upper relay (known to
+    // remain within the platform) for the final four.
+    final groundExtra = difficulty <= 6 ? difficulty : 6;
+    final upperExtra = difficulty <= 6 ? 0 : 1;
+    final rightExtra = difficulty <= 6 ? 0 : 1;
+    final targetX = 4.2 - (groundExtra - 1) * 0.6;
+    final upperCount = 4 + upperExtra;
+    final ballX = 1.55 + (upperCount - 1) * 0.6 + 0.8;
+    final platformRight = ballX + 0.35 > 5.2 ? ballX + 0.35 : 5.2;
+    return [
+      for (final object in cascade_template.level6.objects)
+        if (!(object.kind == ObjectKind.platform && object.y < 9) &&
+            !(object.kind == ObjectKind.domino && object.y < 9 && !object.starter) &&
+            !(object.kind == ObjectKind.ball && object.y < 9) &&
+            object.kind != ObjectKind.target)
           object,
-      ObjectSpec.platform(
-        (platformLeft + platformRight) / 2,
-        lowerSurface,
-        platformRight - platformLeft,
-      ),
-      ...ObjectSpec.dominoRow(
-        fromX: lowerStartX,
-        surfaceY: lowerSurface,
-        count: lowerCount,
-        spacing: lowerSpacing,
-      ),
-      ObjectSpec.ball(ballX, lowerSurface),
+      ObjectSpec.platform((0.2 + platformRight) / 2, 8.0, platformRight - 0.2),
+      ...ObjectSpec.dominoRow(fromX: 1.55, surfaceY: 8.0, count: upperCount, spacing: 0.6),
+      ObjectSpec.ball(ballX, 8.0),
+      ...ObjectSpec.dominoRow(fromX: 5.0, surfaceY: kGroundY, count: groundExtra, spacing: -0.6),
+      ...ObjectSpec.dominoRow(fromX: 8.6, surfaceY: kGroundY, count: rightExtra, spacing: 0.6),
+      ObjectSpec.target(targetX, kGroundY, radius: 0.48),
     ];
-    return objects;
   }
 
   ObjectSpec _transform(
@@ -394,6 +400,25 @@ class LevelGenerator {
         PuzzleLink('upper-run', 'target'),
       ],
     ),
+    LevelTemplate.cascade => const LogicalPuzzle(
+      nodes: [
+        PuzzleNode('start', PuzzleNodeType.starter),
+        PuzzleNode('first-run', PuzzleNodeType.dominoRun),
+        PuzzleNode('first-ball', PuzzleNodeType.ball),
+        PuzzleNode('middle-run', PuzzleNodeType.dominoRun),
+        PuzzleNode('second-ball', PuzzleNodeType.ball),
+        PuzzleNode('ground-run', PuzzleNodeType.dominoRun),
+        PuzzleNode('target', PuzzleNodeType.target),
+      ],
+      links: [
+        PuzzleLink('start', 'first-run'),
+        PuzzleLink('first-run', 'first-ball'),
+        PuzzleLink('first-ball', 'middle-run'),
+        PuzzleLink('middle-run', 'second-ball'),
+        PuzzleLink('second-ball', 'ground-run'),
+        PuzzleLink('ground-run', 'target'),
+      ],
+    ),
     LevelTemplate.auto => throw StateError('Auto template was not resolved.'),
   };
 
@@ -409,9 +434,13 @@ class LevelGenerator {
       LevelTemplate.simpleRelay => 0.0,
       LevelTemplate.drop => 2.0,
       LevelTemplate.spring => 5.0,
+      LevelTemplate.cascade => 6.0,
       LevelTemplate.auto => 0.0,
     };
-    return (1 + (dominoes - 5) * 0.32 + mechanicBonus + difficulty * 0.06)
+    final progression = template == LevelTemplate.cascade
+        ? 3.5 + difficulty * 0.55
+        : 1 + (dominoes - 5) * 0.32 + mechanicBonus + difficulty * 0.06;
+    return (progression)
         .clamp(1, 10)
         .toDouble();
   }
@@ -420,6 +449,7 @@ class LevelGenerator {
     LevelTemplate.simpleRelay => 'Relay',
     LevelTemplate.drop => 'Drop',
     LevelTemplate.spring => 'Spring',
+    LevelTemplate.cascade => 'Cascade',
     LevelTemplate.auto => 'Puzzle',
   };
 
