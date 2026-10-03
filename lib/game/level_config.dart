@@ -6,8 +6,18 @@ const double kWorldHeight = 16;
 const double kGroundY = 14; // top surface of the floor
 
 enum ObjectKind {
-  domino, ball, box, platform, jumper, target,
-  cat, dog, ramp, button, gate, plank,
+  domino,
+  ball,
+  box,
+  platform,
+  jumper,
+  target,
+  cat,
+  dog,
+  ramp,
+  button,
+  gate,
+  plank,
 }
 
 enum ThemeId { garden, workshop, construction, neon, space, ocean, volcano }
@@ -159,26 +169,80 @@ class ObjectSpec {
     double direction = 1,
     double launchVelocity = -15,
     double launchSpeed = 1.7,
-  }) : this._(kind: ObjectKind.jumper, x: x, y: surfaceY - h / 2, w: w, h: h, direction: direction, launchVelocity: launchVelocity, launchSpeed: launchSpeed);
+  }) : this._(
+         kind: ObjectKind.jumper,
+         x: x,
+         y: surfaceY - h / 2,
+         w: w,
+         h: h,
+         direction: direction,
+         launchVelocity: launchVelocity,
+         launchSpeed: launchSpeed,
+       );
 
   /// A character rests on [surfaceY] and runs after a physics hit.
   const ObjectSpec.cat(double x, double surfaceY, {double direction = 1})
-    : this._(kind: ObjectKind.cat, x: x, y: surfaceY - 0.3, w: 0.72, h: 0.6, direction: direction);
+    : this._(
+        kind: ObjectKind.cat,
+        x: x,
+        y: surfaceY - 0.3,
+        w: 0.72,
+        h: 0.6,
+        direction: direction,
+      );
 
   const ObjectSpec.dog(double x, double surfaceY, {double direction = 1})
-    : this._(kind: ObjectKind.dog, x: x, y: surfaceY - 0.34, w: 0.82, h: 0.68, direction: direction);
+    : this._(
+        kind: ObjectKind.dog,
+        x: x,
+        y: surfaceY - 0.34,
+        w: 0.82,
+        h: 0.68,
+        direction: direction,
+      );
 
   /// Static angled physical surface. Positive angles slope down to the right.
-  factory ObjectSpec.ramp(double x, double y, double length, {double angle = 0.35, double h = 0.22}) =>
-      ObjectSpec._(kind: ObjectKind.ramp, x: x, y: y, w: length, h: h, angle: angle);
+  factory ObjectSpec.ramp(
+    double x,
+    double y,
+    double length, {
+    double angle = 0.35,
+    double h = 0.22,
+  }) => ObjectSpec._(
+    kind: ObjectKind.ramp,
+    x: x,
+    y: y,
+    w: length,
+    h: h,
+    angle: angle,
+  );
 
   /// Contact sensor that opens the gate named by [linkedTargetId].
-  const ObjectSpec.button(double x, double y, {double w = 0.55, double h = 0.2, String? id, String? linkedTargetId})
-    : this._(kind: ObjectKind.button, x: x, y: y, w: w, h: h, id: id, linkedTargetId: linkedTargetId);
+  const ObjectSpec.button(
+    double x,
+    double y, {
+    double w = 0.55,
+    double h = 0.2,
+    String? id,
+    String? linkedTargetId,
+  }) : this._(
+         kind: ObjectKind.button,
+         x: x,
+         y: y,
+         w: w,
+         h: h,
+         id: id,
+         linkedTargetId: linkedTargetId,
+       );
 
   /// Static collision barrier; linked buttons deactivate it when pressed.
-  const ObjectSpec.gate(double x, double y, {double w = 0.25, double h = 1.6, String? id})
-    : this._(kind: ObjectKind.gate, x: x, y: y, w: w, h: h, id: id);
+  const ObjectSpec.gate(
+    double x,
+    double y, {
+    double w = 0.25,
+    double h = 1.6,
+    String? id,
+  }) : this._(kind: ObjectKind.gate, x: x, y: y, w: w, h: h, id: id);
 
   /// Dynamic plank that tips and can bridge a gap.
   const ObjectSpec.plank(

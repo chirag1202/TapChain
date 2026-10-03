@@ -1,27 +1,24 @@
-import 'dart:math' as math;
-
 import 'package:flutter/painting.dart';
 
 import '../level_config.dart';
-import 'level_6.dart' show level6, oceanTheme;
-import 'level_7.dart' show level7, volcanoTheme;
-import 'level_9.dart' show level9;
-import 'mechanics_tutorial_levels.dart' show mechanicTutorialLevels;
+import 'level_6.dart' show oceanTheme;
+import 'level_7.dart' show volcanoTheme;
 
 // Authored reasoning stages. Each layout asks the player to read a different
 // route: side entry, split heights, a switch, a spring, or a reversed relay.
 final List<LevelConfig> reasoningPuzzleLevels = [
   LevelConfig(
     id: 21,
-    name: 'Crossroads',
-    hint: 'Start at the junction to send the ball down the lower route.',
+    name: 'Junction Switchback',
+    hint:
+        'The box must send the upper ball through the switch before the shelf transfers reach the gate.',
     theme: oceanTheme,
     baseReward: 420,
-    generationTemplate: 'junction-choice',
+    generationTemplate: 'junction-switchback-gate',
     generationDifficulty: 10,
     complexityScore: 10,
     objects: [
-      ObjectSpec.platform(3.0, 8.2, 4.8),
+      ObjectSpec.platform(4.0, 8.2, 6.0),
       ObjectSpec.box(4.3, 8.2, starter: true, push: const Offset(12, 0)),
       ObjectSpec.ball(5.7, 8.2),
       ObjectSpec.platform(5.8, 11.0, 4.5),
@@ -32,13 +29,16 @@ final List<LevelConfig> reasoningPuzzleLevels = [
         spacing: -0.58,
       ),
       ObjectSpec.ball(5.3, 11.0),
-      ObjectSpec.target(2.6, kGroundY),
+      ObjectSpec.button(6.55, 8.08, id: 's21', linkedTargetId: 'g21'),
+      ObjectSpec.gate(1.65, kGroundY - 0.8, id: 'g21'),
+      ObjectSpec.target(0.6, kGroundY),
     ],
   ),
   LevelConfig(
     id: 22,
-    name: 'The Side Door',
-    hint: 'Read the right-to-left run; the target is behind the starter.',
+    name: 'Two Drops, One Door',
+    hint:
+        'Trace both right-to-left runs and the two falling handoffs before choosing a tap.',
     theme: volcanoTheme,
     baseReward: 430,
     generationTemplate: 'reverse-entry',
@@ -65,173 +65,242 @@ final List<LevelConfig> reasoningPuzzleLevels = [
       ObjectSpec.target(1.2, 10.0, radius: 0.48),
     ],
   ),
-  _basedOn(
-    mechanicTutorialLevels[5],
-    23,
-    'Switchback',
-    'Read the switch, then the gate, before choosing your tap.',
-    'switchback-gate',
+  LevelConfig(
+    id: 23,
+    name: 'Switch Under the Shelf',
+    hint:
+        'The upper ball falls to the lower switch; the gate only protects the last lane.',
+    theme: oceanTheme,
+    baseReward: 440,
+    generationTemplate: 'upper-drop-switch',
+    generationDifficulty: 12,
+    complexityScore: 12,
+    objects: [
+      ObjectSpec.platform(2.4, 8.8, 4.0),
+      ObjectSpec.box(0.8, 8.8, starter: true, push: const Offset(14, 0)),
+      ...ObjectSpec.dominoRow(
+        fromX: 1.4,
+        surfaceY: 8.8,
+        count: 3,
+        spacing: 0.5,
+      ),
+      ObjectSpec.ball(3.3, 8.8),
+      ObjectSpec.button(4.9, kGroundY - 0.12, id: 's23', linkedTargetId: 'g23'),
+      ObjectSpec.gate(5.7, kGroundY - 0.8, id: 'g23'),
+      ObjectSpec.domino(5.05, kGroundY),
+      ObjectSpec.target(7.0, kGroundY, radius: 0.48),
+    ],
   ),
-  _basedOn(
-    level9,
-    24,
-    'High Return',
-    'A ball rebounds from the spring to a raised target route.',
-    'spring-return',
+  LevelConfig(
+    id: 24,
+    name: 'Open the Spring Lane',
+    hint:
+        'The box opens the gate before the ball can reach the spring; tapping the ball skips that step.',
+    theme: volcanoTheme,
+    baseReward: 450,
+    generationTemplate: 'switch-before-spring',
+    generationDifficulty: 13,
+    complexityScore: 13,
+    objects: [
+      ObjectSpec.box(0.8, kGroundY, starter: true, push: const Offset(14, 0)),
+      ...ObjectSpec.dominoRow(
+        fromX: 1.4,
+        surfaceY: kGroundY,
+        count: 3,
+        spacing: 0.56,
+      ),
+      ObjectSpec.ball(3.3, kGroundY),
+      ObjectSpec.button(4.0, kGroundY - 0.12, id: 's24', linkedTargetId: 'g24'),
+      ObjectSpec.gate(4.8, kGroundY - 0.8, id: 'g24'),
+      ObjectSpec.jumper(5.6, kGroundY, direction: 1, launchSpeed: 1.0),
+      ObjectSpec.target(5.9, 10.5, radius: 0.48),
+    ],
   ),
-  _basedOn(
-    level6,
-    25,
-    'Two-Level Fork',
-    'Follow the upper run into the lower return.',
-    'falling-branch',
+  LevelConfig(
+    id: 25,
+    name: 'The Split Chute',
+    hint:
+        'One falling ball starts the lower cross-run; the second ball takes the last drop.',
+    theme: oceanTheme,
+    baseReward: 460,
+    generationTemplate: 'split-chute-handoff',
+    generationDifficulty: 14,
+    complexityScore: 14,
+    objects: [
+      ObjectSpec.platform(2.5, 7.8, 4.6),
+      ObjectSpec.box(0.8, 7.8, starter: true, push: const Offset(14, 0)),
+      ...ObjectSpec.dominoRow(
+        fromX: 1.4,
+        surfaceY: 7.8,
+        count: 3,
+        spacing: 0.52,
+      ),
+      ObjectSpec.ball(3.3, 7.8),
+      ObjectSpec.platform(6.4, 10.1, 4.2),
+      ...ObjectSpec.dominoRow(
+        fromX: 7.8,
+        surfaceY: 10.1,
+        count: 4,
+        spacing: -0.55,
+      ),
+      ObjectSpec.ball(5.3, 10.1),
+      ObjectSpec.target(2.0, kGroundY, radius: 0.48),
+    ],
   ),
-  _basedOn(
-    mechanicTutorialLevels[8],
-    26,
-    'Pet Relay',
-    'Predict which pet will be activated first.',
-    'pet-relay',
+  LevelConfig(
+    id: 26,
+    name: 'Opposite Pet Lanes',
+    hint:
+        'The falling ball starts both pets at opposite ends; predict which one reaches the switch first.',
+    theme: volcanoTheme,
+    baseReward: 470,
+    generationTemplate: 'crossing-pet-lanes',
+    generationDifficulty: 15,
+    complexityScore: 15,
+    objects: [
+      ObjectSpec.platform(2.4, 8.8, 4.0),
+      ObjectSpec.box(0.8, 8.8, starter: true, push: const Offset(14, 0)),
+      ...ObjectSpec.dominoRow(
+        fromX: 1.4,
+        surfaceY: 8.8,
+        count: 3,
+        spacing: 0.5,
+      ),
+      ObjectSpec.ball(3.3, 8.8),
+      ObjectSpec.dog(4.4, kGroundY, direction: 1),
+      ObjectSpec.cat(7.2, kGroundY, direction: -1),
+      ObjectSpec.button(
+        5.95,
+        kGroundY - 0.12,
+        id: 's26',
+        linkedTargetId: 'g26',
+      ),
+      ObjectSpec.gate(6.55, kGroundY - 0.8, id: 'g26'),
+      ObjectSpec.target(8.55, kGroundY, radius: 0.48),
+    ],
   ),
-  _basedOn(
-    mechanicTutorialLevels[9],
-    27,
-    'The Missing Bridge',
-    'The full route combines a ramp, a plank, and a gate.',
-    'plank-switch',
-    mirrored: true,
+  LevelConfig(
+    id: 27,
+    name: 'The Falling Bridge',
+    hint:
+        'The plank drops across the lower domino lane; its far end sends the ball to the target.',
+    theme: oceanTheme,
+    baseReward: 480,
+    generationTemplate: 'plank-falling-bridge',
+    generationDifficulty: 16,
+    complexityScore: 16,
+    objects: [
+      ObjectSpec.platform(2.2, 8.2, 3.6),
+      ObjectSpec.box(0.8, 8.2, starter: true, push: const Offset(14, 0)),
+      ...ObjectSpec.dominoRow(
+        fromX: 1.4,
+        surfaceY: 8.2,
+        count: 3,
+        spacing: 0.5,
+      ),
+      ObjectSpec.ball(3.1, 8.2),
+      ObjectSpec.plank(4.6, 11.1, length: 2.4),
+      ...ObjectSpec.dominoRow(
+        fromX: 6.0,
+        surfaceY: kGroundY,
+        count: 3,
+        spacing: 0.54,
+      ),
+      ObjectSpec.ball(7.9, kGroundY),
+      ObjectSpec.target(8.75, kGroundY, radius: 0.48),
+    ],
   ),
-  _basedOn(
-    level7,
-    28,
-    'Decoy Drop',
-    'Read the descending route from its high starting point.',
-    'decoy-height',
+  LevelConfig(
+    id: 28,
+    name: 'Alternating Shelves',
+    hint:
+        'The upper run moves right; its drop starts a leftward run on the lower shelf.',
+    theme: volcanoTheme,
+    baseReward: 490,
+    generationTemplate: 'alternating-shelf-transfer',
+    generationDifficulty: 17,
+    complexityScore: 17,
+    objects: [
+      ObjectSpec.platform(3.0, 7.8, 4.8),
+      ObjectSpec.box(0.8, 7.8, starter: true, push: const Offset(14, 0)),
+      ...ObjectSpec.dominoRow(
+        fromX: 1.4,
+        surfaceY: 7.8,
+        count: 4,
+        spacing: 0.5,
+      ),
+      ObjectSpec.ball(4.2, 7.8),
+      ObjectSpec.platform(6.6, 10.6, 4.6),
+      ...ObjectSpec.dominoRow(
+        fromX: 8.2,
+        surfaceY: 10.6,
+        count: 4,
+        spacing: -0.55,
+      ),
+      ObjectSpec.ball(5.8, 10.6),
+      ObjectSpec.target(3.6, 10.6, radius: 0.48),
+    ],
   ),
-  _basedOn(
-    mechanicTutorialLevels[6],
-    29,
-    'Ramp Transfer',
-    'Trace the ramp transfer before the final ground run.',
-    'ramp-transfer',
+  LevelConfig(
+    id: 29,
+    name: 'The Ramp Reversal',
+    hint:
+        'The right-hand ramp turns the falling ball back across the lower shelf.',
+    theme: oceanTheme,
+    baseReward: 500,
+    generationTemplate: 'double-ramp-reversal',
+    generationDifficulty: 18,
+    complexityScore: 18,
+    objects: [
+      ObjectSpec.platform(6.5, 7.4, 4.4),
+      ObjectSpec.box(8.2, 7.4, starter: true, push: const Offset(-14, 0)),
+      ...ObjectSpec.dominoRow(
+        fromX: 7.6,
+        surfaceY: 7.4,
+        count: 4,
+        spacing: -0.52,
+      ),
+      ObjectSpec.ball(5.2, 7.4),
+      ObjectSpec.ramp(4.2, 10.8, 2.2, angle: -0.28),
+      ObjectSpec.platform(2.3, 11.4, 3.6),
+      ...ObjectSpec.dominoRow(
+        fromX: 3.5,
+        surfaceY: 11.4,
+        count: 3,
+        spacing: -0.52,
+      ),
+      ObjectSpec.target(1.6, 11.4, radius: 0.48),
+    ],
   ),
-  _basedOn(
-    mechanicTutorialLevels[7],
-    30,
-    'Last Prediction',
-    'The cat must reach the switch before the target route opens.',
-    'sequence-prediction',
+  LevelConfig(
+    id: 30,
+    name: 'Gate-to-Pet Finish',
+    hint:
+        'The domino run opens the gate; the ball then starts the dog and cat relay to the target.',
+    theme: oceanTheme,
+    baseReward: 510,
+    generationTemplate: 'gate-to-pet-relay',
+    generationDifficulty: 19,
+    complexityScore: 19,
+    objects: [
+      ...ObjectSpec.dominoRow(
+        fromX: 1.2,
+        surfaceY: kGroundY,
+        count: 4,
+        spacing: 0.56,
+        firstIsStarter: true,
+      ),
+      ObjectSpec.ball(3.43, kGroundY),
+      ObjectSpec.button(
+        4.35,
+        kGroundY - 0.12,
+        id: 's30a',
+        linkedTargetId: 'g30a',
+      ),
+      ObjectSpec.gate(5.2, kGroundY - 0.8, id: 'g30a'),
+      ObjectSpec.dog(5.8, kGroundY, direction: 1),
+      ObjectSpec.cat(6.8, kGroundY, direction: 1),
+      ObjectSpec.target(9.25, kGroundY, radius: 0.48),
+    ],
   ),
 ];
-
-LevelConfig _basedOn(
-  LevelConfig source,
-  int id,
-  String name,
-  String hint,
-  String concept, {
-  bool mirrored = false,
-}) => LevelConfig(
-  id: id,
-  name: name,
-  hint: hint,
-  theme: source.theme,
-  baseReward: 420 + (id - 21) * 10,
-  generationTemplate: concept,
-  generationDifficulty: id - 11,
-  complexityScore: id - 11,
-  objects: [for (final spec in source.objects) mirrored ? _mirror(spec) : spec],
-);
-
-ObjectSpec _mirror(ObjectSpec spec) {
-  final x = kWorldWidth - spec.x;
-  final angle = -spec.angle;
-  final push = Offset(-spec.push.dx, spec.push.dy);
-  return switch (spec.kind) {
-    ObjectKind.domino => ObjectSpec.domino(
-      x,
-      spec.y + spec.h / 2,
-      h: spec.h,
-      angle: angle,
-      starter: spec.starter,
-      push: push,
-    ),
-    ObjectKind.ball => ObjectSpec.ball(
-      x,
-      spec.y + spec.radius,
-      radius: spec.radius,
-      starter: spec.starter,
-      push: push,
-    ),
-    ObjectKind.box => ObjectSpec.box(
-      x,
-      spec.y + spec.h / 2,
-      w: spec.w,
-      h: spec.h,
-      starter: spec.starter,
-      push: push,
-    ),
-    ObjectKind.platform => ObjectSpec.platform(
-      x + spec.h / 2 * math.sin(angle),
-      spec.y - spec.h / 2 * math.cos(angle),
-      spec.w,
-      h: spec.h,
-      angle: angle,
-    ),
-    ObjectKind.jumper => ObjectSpec.jumper(
-      x,
-      spec.y + spec.h / 2,
-      w: spec.w,
-      h: spec.h,
-      direction: -spec.direction,
-      launchVelocity: spec.launchVelocity,
-      launchSpeed: -spec.launchSpeed,
-    ),
-    ObjectKind.target => ObjectSpec.target(
-      x,
-      spec.y + spec.radius,
-      radius: spec.radius,
-    ),
-    ObjectKind.cat => ObjectSpec.cat(
-      x,
-      spec.y + spec.h / 2,
-      direction: -spec.direction,
-    ),
-    ObjectKind.dog => ObjectSpec.dog(
-      x,
-      spec.y + spec.h / 2,
-      direction: -spec.direction,
-    ),
-    ObjectKind.ramp => ObjectSpec.ramp(
-      x,
-      spec.y,
-      spec.w,
-      angle: angle,
-      h: spec.h,
-    ),
-    ObjectKind.button => ObjectSpec.button(
-      x,
-      spec.y,
-      w: spec.w,
-      h: spec.h,
-      id: spec.id,
-      linkedTargetId: spec.linkedTargetId,
-    ),
-    ObjectKind.gate => ObjectSpec.gate(
-      x,
-      spec.y,
-      w: spec.w,
-      h: spec.h,
-      id: spec.id,
-    ),
-    ObjectKind.plank => ObjectSpec.plank(
-      x,
-      spec.y + spec.h / 2,
-      length: spec.w,
-      h: spec.h,
-      angle: angle,
-      starter: spec.starter,
-      push: push,
-    ),
-  };
-}

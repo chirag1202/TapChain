@@ -1,0 +1,35 @@
+﻿# Levels 11–30: route audit and redesign record
+
+Route counts below come from running the physics engine once for every tappable dynamic object. `x/y` means target-hit taps / total tappable dynamics; each candidate gets one tap and then the simulation runs to rest. Counts are route choices, not a claim that every winner is an equally intended solution. Transitions describe the configured and simulated route, not a visual estimate.
+
+## Level-by-level audit
+
+| Level | Physical chain | Player decision | Winning taps | Decoys / misleading pieces | Spatial transition | Distinct mechanic or structure |
+|---|---|---|---:|---|---|---|
+| 11 | Box → upper domino row → ball → ramp → target | Start at the box or first domino; later taps can also complete it | 2/6 | Remaining dominoes are alternate starters, not real decoys | Raised shelf → floor ramp → ground target | Ramp changes the ball’s horizontal direction |
+| 12 | Plank tips and slides into target | Tap the plank; there is no alternate dynamic object | 1/1 | None | Ground plane only | Standalone plank lesson; too trivial for a reasoning stage |
+| 13 | Domino row → ball → button → gate opens → target | Start at the first domino; tapping later objects skips the required approach | 1/5 | Four domino/ball alternatives fail | Ground lane | First switch-and-gate lesson |
+| 14 | Domino row → ball contacts cat → cat runs to target | Start at the first domino or cat | 2/6 | Other row pieces and ball are decoys | Ground lane | Cat activation and motor run |
+| 15 | Right-to-left domino row → ball → dog → target | Start at the rightmost domino or dog | 2/6 | Other row pieces and ball are decoys | Ground lane, reversed direction | Dog activation and reversed chain |
+| 16 | Box → domino row → ball → button → gate opens → target | Start upstream so the ball reaches the switch | 2/6 | Later row pieces and ball can bypass the switch | Ground lane | Timed switch/gate sequence |
+| 17 | Box → upper right-to-left row → ball drops onto jumper → leftward launch → target | Start at the box, first domino, or ball | 3/6 | Other dominoes and the spring are bad taps | High shelf → floor spring → airborne arc → floor | Spring launch changes height and direction |
+| 18 | Tipped plank sweeps dominoes → ball → target | Tap the plank or first domino | 2/5 | Remaining dominoes and ball are decoy taps | Ground plane | Long moving plank sweeps a separate domino lane |
+| 19 | High box/row → ball drop → dog → cat → button opens gate → target | Start the upper feed or either pet; the pet relay can be entered mid-chain | 5/8 | Some upper dominoes and ball do not complete it | Raised shelf → floor pet relay → gate | Vertical drop feeds a two-pet switch sequence |
+| 20 | Plank → button opens gate → ball → two dominoes → target | Tap the plank, ball, or first domino | 3/4 | Last domino is a bad tap | Ground lane | Plank itself acts as the switch actuator |
+| 21 | Box -> upper ball crosses upper-shelf switch -> ball drops to lower domino row -> second ball -> ground gate -> target | Start with the box so the switch opens before the two-shelf return | 1/7 | Six wrong taps launch real chains but skip the upper switch or send its ball away; all miss the target | Upper shelf -> lower shelf -> ground switchback | Ball handoff at a junction with a gated return; switch is an upstream prerequisite |
+| 22 | Right-to-left upper row → ball falls onto lower right-to-left row → ball → target | Choose the upper starter; a few internal dominoes also work | 4/12 | Most objects are genuine dead-end taps | Two descending shelves → lower target lane | Two separate falling handoffs |
+| 23 | Upper box/row → ball drops onto button → gate opens → last domino → target | Start at the box or first domino before the drop | 2/6 | Remaining upper pieces and the ball are decoys | Upper shelf → ground switch/gate lane | Switch is below the shelf, after a vertical drop |
+| 24 | Box → domino row → button opens gate → ball reaches jumper → vertical launch → elevated target | Open the gate from upstream; tapping the ball skips the switch | 3/5 | Direct ball tap and late dominoes are tested decoys | Ground gate lane → vertical spring arc → high target | Switch prerequisite before a vertical spring launch |
+| 25 | Upper box/row → ball drops to a lower shelf → reverse domino row → second ball → target | Start at the box or a few early dominoes | 4/10 | Other upper/lower row objects miss the handoff | Upper shelf → lower shelf → ground | Cross-lane handoff with opposing row directions |
+| 26 | Upper box/row → ball drop contacts both pets → dog and cat run in opposite directions → first pet reaches switch → gate opens → target | Start the high feed; predict which pet reaches the switch first | 3/7 | Ball, cat, and several dominoes are decoys | Upper shelf → ground, head-on pet crossing | Opposing pet lanes race to the switch |
+| 27 | Upper box/row → ball drops onto plank → lower domino row → ball → target | Start the high shelf; plank and one domino can also complete the route | 4/10 | Other lower pieces and the ball are decoy taps | High shelf → falling plank bridge → floor lane | Plank is a moving bridge/contact transfer, not a decoration |
+| 28 | Box/row runs right → ball drops to second shelf → leftward row → ball → target | Start the box or an early domino; later taps skip a shelf transfer | 5/11 | Six other dynamic taps miss | Upper shelf moves right; lower shelf returns left | Alternating-direction two-shelf transfer |
+| 29 | Right-to-left box/row → ball descends ramp → lower row → target on lower shelf | Start the box, first domino, or lower row’s first piece | 3/9 | Six dynamic alternatives fail; target is clear of the reset layout | High shelf → ramp → lower shelf target | Ramp reverses the route onto a lower shelf; target is not pre-contacting |
+| 30 | Ground domino run → ball presses switch → gate opens → dog → cat → target | Start the row or one of the pets; the domino entry is the intended route | 3/7 | Other dominoes and ball are decoys | Ground lane through a gate into pet relay | Gate-to-pet sequence, distinct from Level 19’s elevated drop |
+
+## Repetition found and changes made
+
+Before this pass, Levels 17–20 reused a simple ramp fall, cat/gate line, two-pet gate line, and a copy of that pet line with disconnected extra objects. Levels 23–30 were mostly direct copies or mirrors: 23 copied the pet/gate tutorial, 24 copied Level 9, 25 copied Level 6, 26 copied the tutorial pet relay, 27 mirrored the mechanic mix, 28 copied Level 7, 29 copied the tutorial gate line, and 30 copied the cat/gate tutorial. Level 21 had a junction layout but nearly every tested tap won; Level 22 was the only clearly layered original in that block.
+
+Levels 17-20 and 23-30 have individually authored layouts and route topologies. Level 21 keeps its junction and return gate, with the switch moved to the upper shelf so only the box-launched ball opens it before the transfer. Level 22 remains a distinct two-drop structure. The exhaustive tap audit uses the production ChainSimulation; Levels 11-16 are unchanged.
+

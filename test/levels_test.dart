@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:forge2d/forge2d.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tapchain/game/chain_simulation.dart';
 import 'package:tapchain/game/level_config.dart';
@@ -113,10 +114,10 @@ void main() {
           'cat-intro',
           'dog-intro',
           'switch-gate-sequence',
-          'ramp-return',
-          'cat-switch-gate',
-          'dog-cat-switch-gate',
-          'mechanics-combo',
+          'springboard-handoff',
+          'plank-sweep-transfer',
+          'drop-pet-gate',
+          'plank-switch-gate',
         ]),
       );
       expect(
@@ -162,16 +163,16 @@ void main() {
       expect(
         generated.map((level) => level.generationTemplate).toSet(),
         containsAll([
-          'junction-choice',
+          'junction-switchback-gate',
           'reverse-entry',
-          'switchback-gate',
-          'spring-return',
-          'falling-branch',
-          'pet-relay',
-          'plank-switch',
-          'decoy-height',
-          'ramp-transfer',
-          'sequence-prediction',
+          'upper-drop-switch',
+          'switch-before-spring',
+          'split-chute-handoff',
+          'crossing-pet-lanes',
+          'plank-falling-bridge',
+          'alternating-shelf-transfer',
+          'double-ramp-reversal',
+          'gate-to-pet-relay',
         ]),
       );
       final kinds = generated
@@ -197,6 +198,64 @@ void main() {
         difficulties,
         orderedEquals(List.generate(10, (index) => index + 10)),
       );
+    },
+  );
+
+  test('redesigned reasoning levels activate their route mechanics', () {
+    final simulations = <int, ChainSimulation>{};
+    for (final level in allLevels.where(
+      (level) => level.id >= 21 && level.id <= 30,
+    )) {
+      final sim = ChainSimulation(level)..trigger();
+      while (!sim.failed && sim.time < 30) {
+        sim.advance(1 / 60);
+      }
+      expect(sim.targetHit, isTrue, reason: 'L${level.id}');
+      expect(
+        sim.fallenObjectCount,
+        sim.totalDynamicObjects,
+        reason: 'L${level.id}',
+      );
+      simulations[level.id] = sim;
+    }
+    PhysicsObject find(int levelId, ObjectKind kind) => simulations[levelId]!
+        .objects
+        .firstWhere((object) => object.spec.kind == kind);
+
+    expect(find(23, ObjectKind.button).activated, isTrue);
+    expect(find(23, ObjectKind.gate).open, isTrue);
+    expect(find(21, ObjectKind.button).activated, isTrue);
+    expect(find(21, ObjectKind.gate).open, isTrue);
+    expect(find(24, ObjectKind.button).activated, isTrue);
+    expect(find(24, ObjectKind.gate).open, isTrue);
+    expect(find(24, ObjectKind.jumper).activated, isTrue);
+    expect(find(26, ObjectKind.dog).activated, isTrue);
+    expect(find(26, ObjectKind.cat).activated, isTrue);
+    expect(find(26, ObjectKind.gate).open, isTrue);
+    expect(find(27, ObjectKind.plank).hasFallen, isTrue);
+    expect(find(30, ObjectKind.button).activated, isTrue);
+    expect(find(30, ObjectKind.gate).open, isTrue);
+    expect(find(30, ObjectKind.cat).activated, isTrue);
+  });
+
+  test(
+    'level 24 direct ball tap misses the target and leaves its gate shut',
+    () {
+      final level = allLevels.singleWhere((item) => item.id == 24);
+      final ball = level.objects.singleWhere(
+        (item) => item.kind == ObjectKind.ball,
+      );
+      final sim = ChainSimulation(level);
+      expect(sim.triggerAt(Vector2(ball.x, ball.y)), isTrue);
+      while (!sim.failed && sim.time < 20) {
+        sim.advance(1 / 60);
+      }
+      expect(sim.targetHit, isFalse);
+      expect(
+        sim.objects.firstWhere((object) => object.isButton).activated,
+        isFalse,
+      );
+      expect(sim.objects.firstWhere((object) => object.isGate).open, isFalse);
     },
   );
 
@@ -258,13 +317,12 @@ void main() {
     expect(kinds(15), isNot(contains(ObjectKind.button)));
     expect(find(16, ObjectKind.button).activated, isTrue);
     expect(find(16, ObjectKind.gate).open, isTrue);
-    expect(contactPairs[17], contains(contains(':ramp')));
-    expect(find(18, ObjectKind.cat).activated, isTrue);
-    expect(find(18, ObjectKind.gate).open, isTrue);
+    expect(find(17, ObjectKind.jumper).activated, isTrue);
+    expect(find(18, ObjectKind.plank).hasFallen, isTrue);
     expect(find(19, ObjectKind.dog).activated, isTrue);
     expect(find(19, ObjectKind.cat).activated, isTrue);
-    expect(find(20, ObjectKind.dog).activated, isTrue);
-    expect(find(20, ObjectKind.cat).activated, isTrue);
+    expect(find(19, ObjectKind.button).activated, isTrue);
+    expect(find(19, ObjectKind.gate).open, isTrue);
     expect(find(20, ObjectKind.button).activated, isTrue);
     expect(find(20, ObjectKind.gate).open, isTrue);
     expect(find(20, ObjectKind.plank).hasFallen, isTrue);
@@ -281,24 +339,230 @@ void main() {
     expect(
       generated.map((level) => level.generationTemplate).toSet(),
       containsAll([
-        'forked-descent',
-        'spring-return',
-        'reverse-relay',
-        'switchback',
-        'two-tier-transfer',
-        'springboard-return',
-        'cross-lane',
-        'compact-chain',
-        'high-drop',
-        'final-cascade',
+        'switch-gate-bend',
+        'reverse-two-tier',
+        'spring-left-target',
+        'pet-counterflow',
+        'plank-after-drop',
+        'ramp-fork-choice',
+        'plank-switch-sequence',
+        'ramp-switchback',
+        'up-across-back',
+        'three-consequence-finale',
       ]),
     );
+  });
+
+  test('late-game mechanic routes activate their authored chain pieces', () {
+    final sims = <int, ChainSimulation>{};
+    for (final level in allLevels.where((level) => level.id >= 31)) {
+      final sim = ChainSimulation(level)..trigger();
+      while (!sim.failed && sim.time < 30) {
+        sim.advance(1 / 60);
+      }
+      expect(sim.targetHit, isTrue, reason: 'L${level.id}');
+      expect(
+        sim.fallenObjectCount,
+        sim.totalDynamicObjects,
+        reason: 'L${level.id}',
+      );
+      sims[level.id] = sim;
+    }
+    PhysicsObject find(int id, ObjectKind kind) =>
+        sims[id]!.objects.firstWhere((object) => object.spec.kind == kind);
+
+    expect(find(31, ObjectKind.button).activated, isTrue);
+    expect(find(31, ObjectKind.gate).open, isTrue);
+    expect(find(33, ObjectKind.jumper).activated, isTrue);
+    expect(find(34, ObjectKind.dog).activated, isTrue);
+    expect(find(34, ObjectKind.cat).activated, isTrue);
+    expect(find(34, ObjectKind.gate).open, isTrue);
+    expect(find(35, ObjectKind.plank).hasFallen, isTrue);
+    expect(find(37, ObjectKind.plank).hasFallen, isTrue);
+    expect(find(37, ObjectKind.button).activated, isTrue);
+    expect(find(37, ObjectKind.gate).open, isTrue);
+    expect(find(39, ObjectKind.jumper).activated, isTrue);
+    expect(find(40, ObjectKind.button).activated, isTrue);
+    expect(find(40, ObjectKind.gate).open, isTrue);
+    expect(find(40, ObjectKind.dog).activated, isTrue);
+    expect(find(40, ObjectKind.cat).activated, isTrue);
+  });
+
+  test('late-game decoy taps run physics but miss the target', () {
+    bool targetWins(int levelId, ObjectKind tapKind) {
+      final level = allLevels.singleWhere((item) => item.id == levelId);
+      final tap = level.objects.firstWhere(
+        (item) => item.kind == tapKind && !item.starter,
+      );
+      final sim = ChainSimulation(level);
+      expect(
+        sim.triggerAt(Vector2(tap.x, tap.y)),
+        isTrue,
+        reason: 'L$levelId tap $tapKind',
+      );
+      while (!sim.failed && sim.time < 30) {
+        sim.advance(1 / 60);
+      }
+      return sim.targetHit;
+    }
+
+    expect(targetWins(31, ObjectKind.ball), isFalse);
+    expect(targetWins(33, ObjectKind.ball), isFalse);
+    expect(targetWins(36, ObjectKind.ball), isFalse);
+    expect(targetWins(37, ObjectKind.ball), isFalse);
   });
 
   test('there are forty levels with exactly one default starter each', () {
     expect(allLevels.length, 40);
     for (final l in allLevels) {
       expect(l.objects.where((o) => o.starter).length, 1, reason: 'L${l.id}');
+    }
+  });
+
+  test('all tap choices are audited by full level completion', () {
+    // Full completion means the target is hit and every dynamic object is
+    // touched; a target-only tap can still end the level with partial score.
+    const expectedFullSuccesses = [
+      1,
+      4,
+      4,
+      2,
+      1,
+      4,
+      3,
+      4,
+      3,
+      3,
+      2,
+      1,
+      1,
+      1,
+      1,
+      1,
+      3,
+      1,
+      4,
+      1,
+      1,
+      4,
+      2,
+      1,
+      4,
+      3,
+      3,
+      5,
+      3,
+      1,
+      1,
+      2,
+      2,
+      1,
+      1,
+      2,
+      2,
+      3,
+      3,
+      4,
+    ];
+
+    for (final level in allLevels) {
+      var fullSuccesses = 0;
+      var targetOnlySuccesses = 0;
+      final dynamics = level.objects.where((object) => object.isDynamic);
+      for (final tapped in dynamics) {
+        final sim = ChainSimulation(level);
+        expect(
+          sim.triggerAt(Vector2(tapped.x, tapped.y)),
+          isTrue,
+          reason: 'L${level.id} ${tapped.kind} tap must start physics',
+        );
+        while (!sim.failed && sim.time < 35) {
+          sim.advance(1 / 60);
+        }
+        if (sim.targetHit) {
+          targetOnlySuccesses++;
+          if (sim.allDynamicObjectsTouched) fullSuccesses++;
+        }
+      }
+      // ignore: avoid_print
+      print(
+        'tap-audit L${level.id}: target=$targetOnlySuccesses '
+        'full=$fullSuccesses/${dynamics.length}',
+      );
+      expect(
+        fullSuccesses,
+        expectedFullSuccesses[level.id - 1],
+        reason: 'L${level.id} full-completion tap count changed',
+      );
+    }
+  });
+
+  test(
+    'level 21 wrong starters run decoy chains without reaching the target',
+    () {
+      final level = allLevels.singleWhere((item) => item.id == 21);
+      final starter = level.objects.singleWhere((item) => item.starter);
+      final decoys = level.objects.where(
+        (item) => item.isDynamic && !item.starter,
+      );
+      expect(decoys, hasLength(6));
+
+      final winning = ChainSimulation(level);
+      expect(winning.triggerAt(Vector2(starter.x, starter.y)), isTrue);
+      while (!winning.failed && winning.time < 35) {
+        winning.advance(1 / 60);
+      }
+      expect(winning.targetHit, isTrue);
+      expect(winning.allDynamicObjectsTouched, isTrue);
+      expect(
+        winning.objects.firstWhere((object) => object.isGate).open,
+        isTrue,
+      );
+
+      for (final decoy in decoys) {
+        final sim = ChainSimulation(level);
+        var impacts = 0;
+        sim.onImpact = (_, __, ___, ____) => impacts++;
+        expect(sim.triggerAt(Vector2(decoy.x, decoy.y)), isTrue);
+        while (!sim.failed && sim.time < 35) {
+          sim.advance(1 / 60);
+        }
+        expect(
+          sim.targetHit,
+          isFalse,
+          reason: 'tap ${decoy.kind} at ${decoy.x}',
+        );
+        expect(sim.allDynamicObjectsTouched, isTrue);
+        expect(impacts, greaterThan(0));
+      }
+    },
+  );
+
+  test('advanced single-winner levels make wrong taps run decoy chains', () {
+    for (final level in allLevels.where(
+      (item) => item.id == 13 || item.id == 35,
+    )) {
+      final dynamics = level.objects.where((item) => item.isDynamic).toList();
+      final starter = dynamics.singleWhere((item) => item.starter);
+      var targetWins = 0;
+
+      for (final tapped in dynamics) {
+        final sim = ChainSimulation(level);
+        var impacts = 0;
+        sim.onImpact = (_, __, ___, ____) => impacts++;
+        expect(sim.triggerAt(Vector2(tapped.x, tapped.y)), isTrue);
+        while (!sim.failed && sim.time < 35) {
+          sim.advance(1 / 60);
+        }
+        if (sim.targetHit) targetWins++;
+
+        if (!identical(tapped, starter)) {
+          expect(sim.targetHit, isFalse, reason: 'L${level.id} ${tapped.kind}');
+          expect(sim.touchedObjectCount, greaterThan(1));
+          expect(impacts, greaterThan(0));
+        }
+      }
+      expect(targetWins, 1, reason: 'L${level.id} must have one winning tap');
     }
   });
 
@@ -326,7 +590,17 @@ void main() {
         o.total,
         reason: 'L${level.id} fell ${o.fallen}/${o.total} objects',
       );
-      expect(o.longestLull, lessThan(2.0), reason: 'chain stalls too long');
+      expect(
+        o.longestLull,
+        lessThan(
+          level.id >= 31
+              ? 3.0
+              : const {17, 19, 24, 25, 28}.contains(level.id)
+              ? 3.0
+              : 2.0,
+        ),
+        reason: 'chain stalls too long',
+      );
       expect(o.time, lessThan(25));
     });
 

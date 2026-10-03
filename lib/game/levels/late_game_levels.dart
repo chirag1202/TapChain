@@ -1,104 +1,277 @@
-import '../level_config.dart';
-import 'level_1.dart' show level1;
-import 'level_2.dart' show level2;
-import 'level_3.dart' show level3;
-import 'level_4.dart' show level4;
-import 'level_5.dart' show level5;
-import 'level_6.dart' show level6;
-import 'level_7.dart' show level7;
-import 'level_8.dart' show level8;
-import 'level_9.dart' show level9;
-import 'level_10.dart' show level10;
+import 'package:flutter/painting.dart';
 
-// The final chapter revisits the game's route families in a mixed order so
-// players must inspect each layout instead of learning a repeating template.
+import '../level_config.dart';
+import 'level_2.dart' show workshopTheme;
+import 'level_4.dart' show neonTheme;
+import 'level_6.dart' show oceanTheme;
+import 'level_7.dart' show volcanoTheme;
+
+const _reward = 620;
+
+/// Hand-authored finale. Each level changes the route topology or the order in
+/// which a mechanic must be activated; these are not generator template cycles.
 final List<LevelConfig> lateGameLevels = [
-  _stage(
-    level6,
-    31,
-    'Forked Descent',
-    'Read both drops before the lower return.',
-    'forked-descent',
+  LevelConfig(
+    id: 31,
+    name: 'Switch at the Bend',
+    hint:
+        'The switch is before the gate. Start midway to send the ball through it.',
+    theme: oceanTheme,
+    baseReward: _reward,
+    generationTemplate: 'switch-gate-bend',
+    generationDifficulty: 11,
+    complexityScore: 11,
+    objects: [
+      ObjectSpec.box(1.0, kGroundY, starter: true, push: const Offset(14, 0)),
+      ...ObjectSpec.dominoRow(fromX: 1.7, surfaceY: kGroundY, count: 4, spacing: 0.56),
+      ObjectSpec.ball(4.5, kGroundY),
+      ObjectSpec.button(5.05, kGroundY - 0.12, id: 's31', linkedTargetId: 'g31'),
+      ObjectSpec.gate(5.9, kGroundY - 0.8, id: 'g31'),
+      ObjectSpec.target(7.4, kGroundY, radius: 0.48),
+    ],
   ),
-  _stage(
-    level9,
-    32,
-    'Spring Return',
-    'Predict where the spring will send the ball.',
-    'spring-return',
+  LevelConfig(
+    id: 32,
+    name: 'The Return Lane',
+    hint:
+        'Start on the upper right; the ball must cross the lower lane back to the target.',
+    theme: volcanoTheme,
+    baseReward: _reward + 20,
+    generationTemplate: 'reverse-two-tier',
+    generationDifficulty: 12,
+    complexityScore: 12,
+    objects: [
+      ObjectSpec.platform(6.6, 6.4, 4.4),
+      ObjectSpec.domino(8.1, 6.4, starter: true, push: const Offset(-0.38, 0)),
+      ...ObjectSpec.dominoRow(
+        fromX: 7.5,
+        surfaceY: 6.4,
+        count: 4,
+        spacing: -0.58,
+      ),
+      ObjectSpec.ball(5.0, 6.4),
+      ObjectSpec.ramp(4.4, 8.8, 2.2, angle: -0.28),
+      ObjectSpec.platform(2.8, 10.3, 4.4),
+      ObjectSpec.target(1.5, 10.3, radius: 0.48),
+    ],
   ),
-  _stage(
-    level4,
-    33,
-    'Reverse Relay',
-    'The starter is on the far side; follow the route back.',
-    'reverse-relay',
+  LevelConfig(
+    id: 33,
+    name: 'Spring to the Left Target',
+    hint:
+        'The upper row feeds a leftward launch; the ball must land on the floor target.',
+    theme: neonTheme,
+    baseReward: _reward + 40,
+    generationTemplate: 'spring-left-target',
+    generationDifficulty: 13,
+    complexityScore: 13,
+    objects: [
+      ObjectSpec.platform(7.0, 9.3, 3.8),
+      ObjectSpec.box(8.15, 9.3, starter: true, push: const Offset(-14, 0)),
+      ...ObjectSpec.dominoRow(
+        fromX: 7.55,
+        surfaceY: 9.3,
+        count: 4,
+        spacing: -0.5,
+      ),
+      ObjectSpec.ball(5.45, 9.3),
+      ObjectSpec.jumper(3.0, kGroundY, w: 1.2, direction: -1),
+      ObjectSpec.target(2.0, kGroundY, radius: 0.65),
+    ],
   ),
-  _stage(
-    level7,
-    34,
-    'Lava Switchback',
-    'Trace the alternating platforms from right to left.',
-    'switchback',
+  LevelConfig(
+    id: 34,
+    name: 'Counterflow Pet Relay',
+    hint:
+        'Start on the right: the dog wakes the cat, which presses the linked gate switch.',
+    theme: workshopTheme,
+    baseReward: _reward + 60,
+    generationTemplate: 'pet-counterflow',
+    generationDifficulty: 14,
+    complexityScore: 14,
+    objects: [
+      ObjectSpec.domino(
+        7.8,
+        kGroundY,
+        starter: true,
+        push: const Offset(-0.35, 0),
+      ),
+      ...ObjectSpec.dominoRow(
+        fromX: 7.24,
+        surfaceY: kGroundY,
+        count: 3,
+        spacing: -0.56,
+      ),
+      ObjectSpec.ball(5.57, kGroundY),
+      ObjectSpec.dog(4.79, kGroundY, direction: -1),
+      ObjectSpec.cat(3.89, kGroundY, direction: -1),
+      ObjectSpec.button(
+        3.04,
+        kGroundY - 0.12,
+        id: 's34',
+        linkedTargetId: 'g34',
+      ),
+      ObjectSpec.gate(2.39, kGroundY - 0.8, id: 'g34'),
+      ObjectSpec.target(0.45, kGroundY, radius: 0.48),
+    ],
   ),
-  _stage(
-    level3,
-    35,
-    'Two-Tier Transfer',
-    'The upper run must feed the lower platform.',
-    'two-tier-transfer',
+  LevelConfig(
+    id: 35,
+    name: 'Plank After the Drop',
+    hint:
+        'Topple the high row so the ball lands on the plank, not straight into the gap.',
+    theme: oceanTheme,
+    baseReward: _reward + 80,
+    generationTemplate: 'plank-after-drop',
+    generationDifficulty: 15,
+    complexityScore: 15,
+    objects: [
+      ObjectSpec.platform(2.2, 7.2, 4.2),
+      ObjectSpec.box(0.8, 7.2, starter: true, push: const Offset(14, 0)),
+      ...ObjectSpec.dominoRow(
+        fromX: 1.4,
+        surfaceY: 7.2,
+        count: 4,
+        spacing: 0.5,
+      ),
+      ObjectSpec.ball(3.6, 7.2),
+      ObjectSpec.plank(5.2, 10.3, length: 2.4, angle: -0.12),
+      ObjectSpec.platform(7.4, 10.8, 3.0),
+      ObjectSpec.ramp(6.5, 12.0, 2.2, angle: 0.25),
+      ObjectSpec.target(6.1, kGroundY, radius: 0.48),
+    ],
   ),
-  _stage(
-    level10,
-    36,
-    'Springboard Return',
-    'Read the drop onto the spring, then the elevated lane.',
-    'springboard-return',
+  LevelConfig(
+    id: 36,
+    name: 'Ramp Choice',
+    hint:
+        'The ramp sends the ball down to the left-hand chain; tapping the right row sends it away from the target.',
+    theme: volcanoTheme,
+    baseReward: _reward + 100,
+    generationTemplate: 'ramp-fork-choice',
+    generationDifficulty: 16,
+    complexityScore: 16,
+    objects: [
+      ObjectSpec.platform(4.5, 7.3, 7.6),
+      ObjectSpec.domino(2.2, 7.3, starter: true, push: const Offset(0.38, 0)),
+      ObjectSpec.domino(2.8, 7.3),
+      ObjectSpec.domino(3.4, 7.3),
+      ObjectSpec.domino(4.0, 7.3),
+      ObjectSpec.ball(4.8, 7.3),
+      ObjectSpec.ramp(5.2, 9.6, 2.8, angle: 0.35),
+      ObjectSpec.target(8.3, 7.3, radius: 0.48),
+    ],
   ),
-  _stage(
-    level8,
-    37,
-    'Long Crosscurrent',
-    'Start low and follow the ball along the cross-lane.',
-    'cross-lane',
+  LevelConfig(
+    id: 37,
+    name: 'Open Before Impact',
+    hint:
+        'Tap the plank to press the switch; the row cannot pass the gate until it opens.',
+    theme: neonTheme,
+    baseReward: _reward + 120,
+    generationTemplate: 'plank-switch-sequence',
+    generationDifficulty: 17,
+    complexityScore: 17,
+    objects: [
+      ObjectSpec.plank(
+        3.5,
+        kGroundY,
+        length: 2.0,
+        starter: true,
+        push: const Offset(30, 0),
+      ),
+      ObjectSpec.button(
+        4.35,
+        kGroundY - 0.12,
+        id: 's37',
+        linkedTargetId: 'g37',
+      ),
+      ObjectSpec.gate(7.5, kGroundY - 0.8, h: 1.6, id: 'g37'),
+      ...ObjectSpec.dominoRow(
+        fromX: 4.8,
+        surfaceY: kGroundY,
+        count: 4,
+        spacing: 0.55,
+      ),
+      ObjectSpec.ball(7.0, kGroundY),
+      ObjectSpec.target(8.3, kGroundY, radius: 0.48),
+    ],
   ),
-  _stage(
-    level5,
-    38,
-    'Compact Chain',
-    'A short tap must topple the full row.',
-    'compact-chain',
+  LevelConfig(
+    id: 38,
+    name: 'Ramp Switchback',
+    hint:
+        'Start on the raised right lane; the ramp redirects the fall into the lower domino run.',
+    theme: workshopTheme,
+    baseReward: _reward + 140,
+    generationTemplate: 'ramp-switchback',
+    generationDifficulty: 18,
+    complexityScore: 18,
+    objects: [
+      ObjectSpec.platform(6.0, 10.0, 4.8),
+      ObjectSpec.box(7.9, 10.0, starter: true, push: const Offset(-14, 0)),
+      ...ObjectSpec.dominoRow(
+        fromX: 7.3,
+        surfaceY: 10.0,
+        count: 4,
+        spacing: -0.52,
+      ),
+      ObjectSpec.ball(5.0, 10.0),
+      ObjectSpec.ramp(3.7, 12.2, 2.4, angle: -0.3),
+      ...ObjectSpec.dominoRow(
+        fromX: 2.8,
+        surfaceY: kGroundY,
+        count: 4,
+        spacing: -0.55,
+      ),
+      ObjectSpec.target(0.45, kGroundY, radius: 0.48),
+    ],
   ),
-  _stage(
-    level2,
-    39,
-    'High Drop',
-    'Follow the ball from the first ledge to the target shelf.',
-    'high-drop',
+  LevelConfig(
+    id: 39,
+    name: 'Up, Across, Back',
+    hint:
+        'The ball lands on the spring and must ride the launch arc back to the target.',
+    theme: oceanTheme,
+    baseReward: _reward + 160,
+    generationTemplate: 'up-across-back',
+    generationDifficulty: 19,
+    complexityScore: 19,
+    objects: [
+      ObjectSpec.platform(2.4, 10.3, 4.0),
+      ObjectSpec.box(0.8, 10.3, starter: true, push: const Offset(14, 0)),
+      ...ObjectSpec.dominoRow(
+        fromX: 1.4,
+        surfaceY: 10.3,
+        count: 4,
+        spacing: 0.5,
+      ),
+      ObjectSpec.ball(3.7, 10.3),
+      ObjectSpec.jumper(6.0, kGroundY, direction: -1, launchSpeed: 1.2),
+      ObjectSpec.target(6.0, kGroundY, radius: 0.65),
+    ],
   ),
-  _stage(
-    level1,
-    40,
-    'Final Cascade',
-    'Find the starter and predict the final contact.',
-    'final-cascade',
+  LevelConfig(
+    id: 40,
+    name: 'One Tap, Three Consequences',
+    hint:
+        'Predict the order: the ball presses the switch, clears the gate, then reaches the target.',
+    theme: neonTheme,
+    baseReward: _reward + 180,
+    generationTemplate: 'three-consequence-finale',
+    generationDifficulty: 20,
+    complexityScore: 20,
+    objects: [
+      ObjectSpec.platform(4.5, 8.1, 8.0),
+      ObjectSpec.domino(2.1, 8.1, starter: true, push: const Offset(0.4, 0)),
+      ObjectSpec.domino(2.7, 8.1),
+      ObjectSpec.domino(3.3, 8.1),
+      ObjectSpec.ball(4.1, 8.1),
+      ObjectSpec.button(4.8, 7.85, id: 's40', linkedTargetId: 'g40'),
+      ObjectSpec.gate(5.5, 7.3, h: 1.6, id: 'g40'),
+      ObjectSpec.dog(6.3, 8.1, direction: 1),
+      ObjectSpec.cat(7.2, 8.1, direction: 1),
+      ObjectSpec.target(8.3, 8.1, radius: 0.48),
+    ],
   ),
 ];
-
-LevelConfig _stage(
-  LevelConfig source,
-  int id,
-  String name,
-  String hint,
-  String concept,
-) => LevelConfig(
-  id: id,
-  name: name,
-  hint: hint,
-  theme: source.theme,
-  baseReward: 600 + (id - 31) * 20,
-  generationTemplate: concept,
-  generationDifficulty: id - 20,
-  complexityScore: (id - 20).toDouble(),
-  objects: source.objects,
-);

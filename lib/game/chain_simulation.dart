@@ -45,9 +45,11 @@ class ChainSimulation extends ContactListener {
 
   int get fallenObjectCount => objects.where((o) => o.hasFallen).length;
 
-  int get touchedObjectCount => objects.where((o) => o.spec.isDynamic && o.touched).length;
+  int get touchedObjectCount =>
+      objects.where((o) => o.spec.isDynamic && o.touched).length;
 
-  bool get allDynamicObjectsTouched => touchedObjectCount == totalDynamicObjects;
+  bool get allDynamicObjectsTouched =>
+      touchedObjectCount == totalDynamicObjects;
 
   /// Gameplay may finish once the target and every dynamic object have been
   /// contacted, without waiting for their remaining momentum to settle.
@@ -67,8 +69,14 @@ class ChainSimulation extends ContactListener {
         position: Vector2(spec.x, spec.y),
         angle: spec.angle,
         angularDamping: spec.kind == ObjectKind.ball ? 0.15 : 0.05,
-        linearDamping: spec.kind == ObjectKind.box || spec.kind == ObjectKind.cat || spec.kind == ObjectKind.dog ? 0.05 : 0,
-        fixedRotation: spec.kind == ObjectKind.cat || spec.kind == ObjectKind.dog,
+        linearDamping:
+            spec.kind == ObjectKind.box ||
+                spec.kind == ObjectKind.cat ||
+                spec.kind == ObjectKind.dog
+            ? 0.05
+            : 0,
+        fixedRotation:
+            spec.kind == ObjectKind.cat || spec.kind == ObjectKind.dog,
         bullet: spec.kind == ObjectKind.ball,
       );
       final body = world.createBody(def);
@@ -108,24 +116,33 @@ class ChainSimulation extends ContactListener {
         case ObjectKind.plank:
           body.createFixture(
             spec.kind == ObjectKind.plank
-                ? Materials.plank(PolygonShape()..setAsBoxXY(spec.w / 2, spec.h / 2))
-                : Materials.character(PolygonShape()..setAsBoxXY(spec.w / 2, spec.h / 2)),
+                ? Materials.plank(
+                    PolygonShape()..setAsBoxXY(spec.w / 2, spec.h / 2),
+                  )
+                : Materials.character(
+                    PolygonShape()..setAsBoxXY(spec.w / 2, spec.h / 2),
+                  ),
           );
         case ObjectKind.ramp:
           body.createFixture(
             Materials.ramp(
-              PolygonShape()
-                ..set([
-                  Vector2(-spec.w / 2, spec.h / 2),
-                  Vector2(spec.w / 2, -spec.h / 2),
-                  Vector2(spec.w / 2, spec.h / 2),
-                ]),
+              PolygonShape()..set([
+                Vector2(-spec.w / 2, spec.h / 2),
+                Vector2(spec.w / 2, -spec.h / 2),
+                Vector2(spec.w / 2, spec.h / 2),
+              ]),
             ),
           );
         case ObjectKind.button:
-          body.createFixture(Materials.button(PolygonShape()..setAsBoxXY(spec.w / 2, spec.h / 2)));
+          body.createFixture(
+            Materials.button(
+              PolygonShape()..setAsBoxXY(spec.w / 2, spec.h / 2),
+            ),
+          );
         case ObjectKind.gate:
-          body.createFixture(Materials.gate(PolygonShape()..setAsBoxXY(spec.w / 2, spec.h / 2)));
+          body.createFixture(
+            Materials.gate(PolygonShape()..setAsBoxXY(spec.w / 2, spec.h / 2)),
+          );
       }
       final obj = PhysicsObject(spec, body);
       body.userData = obj;
@@ -198,7 +215,10 @@ class ChainSimulation extends ContactListener {
         object.running = true;
         object.activated = true;
         object.flash = 0;
-        object.body.linearVelocity = Vector2(spec.direction * 4.0, object.body.linearVelocity.y);
+        object.body.linearVelocity = Vector2(
+          spec.direction * 4.0,
+          object.body.linearVelocity.y,
+        );
         object.body.setAwake(true);
         return;
       }
@@ -252,7 +272,10 @@ class ChainSimulation extends ContactListener {
     for (final o in objects) {
       if (o.spec.isDynamic) o.savePrevious();
       if (o.isCharacter && o.running) {
-        o.body.linearVelocity = Vector2(o.spec.direction * 4.0, o.body.linearVelocity.y);
+        o.body.linearVelocity = Vector2(
+          o.spec.direction * 4.0,
+          o.body.linearVelocity.y,
+        );
       }
     }
     world.stepDt(step);
@@ -283,7 +306,10 @@ class ChainSimulation extends ContactListener {
       character.running = true;
       character.activated = true;
       character.flash = 0;
-      character.body.linearVelocity = Vector2(character.spec.direction * 4.0, character.body.linearVelocity.y);
+      character.body.linearVelocity = Vector2(
+        character.spec.direction * 4.0,
+        character.body.linearVelocity.y,
+      );
       character.body.setAwake(true);
     }
     _pendingCharacters.clear();
@@ -339,7 +365,11 @@ class ChainSimulation extends ContactListener {
       }
     }
 
-    final button = a.isButton ? a : b.isButton ? b : null;
+    final button = a.isButton
+        ? a
+        : b.isButton
+        ? b
+        : null;
     if (button != null && !button.activated) {
       final other = identical(button, a) ? b : a;
       if (other.spec.isDynamic) {
